@@ -1,5 +1,5 @@
 import { fieldLabels } from "./section-config";
-import { filledFields, relationName, titleOf, valueText } from "./entity-utils";
+import { filledFields, relationName, singularLabelOf, titleOf, valueText } from "./entity-utils";
 import type { EntityRecord, EntityRows, EntitySection, SectionConfig } from "./types";
 
 type EntityDetailsModalProps = {
@@ -7,10 +7,7 @@ type EntityDetailsModalProps = {
   config: SectionConfig;
   item: EntityRecord;
   rows: EntityRows;
-  saving?: boolean;
   onClose: () => void;
-  onEdit?: (section: EntitySection, item: EntityRecord) => void;
-  onDelete?: (section: EntitySection, item: EntityRecord) => void;
 };
 
 export function EntityDetailsModal({
@@ -18,10 +15,7 @@ export function EntityDetailsModal({
   config,
   item,
   rows,
-  saving,
-  onClose,
-  onEdit,
-  onDelete
+  onClose
 }: EntityDetailsModalProps) {
   const visibleFields = filledFields(item, config);
   const title = titleOf(item, config);
@@ -49,7 +43,7 @@ export function EntityDetailsModal({
       >
         <header style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "flex-start", marginBottom: 20 }}>
           <div>
-            <p className="forge-kicker">{config.label}</p>
+            <p className="forge-kicker">{singularLabelOf(section)}</p>
             <h1 style={{ fontSize: 42, lineHeight: 1, margin: "10px 0 0", letterSpacing: "-0.04em" }}>{String(title)}</h1>
             {(item.type || item.category || item.event_type) ? (
               <span className="forge-status-pill" style={{ display: "inline-block", marginTop: 14 }}>
@@ -74,7 +68,7 @@ export function EntityDetailsModal({
         {visibleFields.length === 0 ? (
           <section className="forge-card-accent" style={{ padding: 22, borderStyle: "dashed" }}>
             <h2 style={{ marginTop: 0 }}>Sem detalhes preenchidos.</h2>
-            <p className="forge-muted" style={{ lineHeight: 1.6, marginBottom: 0 }}>Edite este registro para acrescentar informações narrativas.</p>
+            <p className="forge-muted" style={{ lineHeight: 1.6, marginBottom: 0 }}>Use o botão Editar no card para acrescentar informações narrativas.</p>
           </section>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
@@ -88,29 +82,6 @@ export function EntityDetailsModal({
             ))}
           </div>
         )}
-
-        <footer style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap", marginTop: 24 }}>
-          {onEdit ? <button className="forge-button-primary" onClick={() => onEdit(section, item)}>Editar no drawer</button> : null}
-          {onDelete ? (
-            <button
-              type="button"
-              onClick={() => onDelete(section, item)}
-              disabled={saving}
-              style={{
-                border: "1px solid rgba(248,113,113,0.38)",
-                borderRadius: 999,
-                padding: "12px 18px",
-                background: "rgba(127,29,29,0.24)",
-                color: "var(--forge-danger)",
-                fontWeight: 850,
-                cursor: saving ? "not-allowed" : "pointer",
-                opacity: saving ? 0.68 : 1
-              }}
-            >
-              Apagar
-            </button>
-          ) : null}
-        </footer>
       </section>
     </div>
   );
