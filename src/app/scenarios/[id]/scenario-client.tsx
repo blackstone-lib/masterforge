@@ -64,21 +64,81 @@ type Faction = {
   updated_at: string;
 };
 
-type ActiveSection = "overview" | "nations" | "locations" | "factions" | "characters" | "secrets";
+type GenericRecord = Record<string, unknown> & { id: string; name?: string | null; title?: string | null; type?: string | null; category?: string | null; event_type?: string | null };
+
+type ActiveSection =
+  | "overview"
+  | "nations"
+  | "settlements"
+  | "locations"
+  | "factions"
+  | "characters"
+  | "timeline_events"
+  | "lore_entries"
+  | "secrets";
+
 type EditorMode = "scenario" | "nation-create" | "nation-edit" | "location-create" | "location-edit" | "faction-create" | "faction-edit" | null;
 
-const sections: Array<{ id: ActiveSection; label: string }> = [
-  { id: "overview", label: "Visão geral" },
-  { id: "nations", label: "Nações" },
-  { id: "locations", label: "Locais" },
-  { id: "factions", label: "Facções" },
-  { id: "characters", label: "Personagens" },
-  { id: "secrets", label: "Segredos" }
+const sections: Array<{ id: ActiveSection; label: string; editable: boolean }> = [
+  { id: "overview", label: "Visão geral", editable: false },
+  { id: "nations", label: "Nações", editable: true },
+  { id: "settlements", label: "Assentamentos", editable: false },
+  { id: "locations", label: "Locais", editable: true },
+  { id: "factions", label: "Facções", editable: true },
+  { id: "characters", label: "Personagens", editable: false },
+  { id: "timeline_events", label: "Linha do tempo", editable: false },
+  { id: "lore_entries", label: "Lore", editable: false },
+  { id: "secrets", label: "Segredos", editable: false }
 ];
 
 const nationSelect = "id, scenario_id, name, description, government_type, capital, culture, religion, current_conflicts, master_secret, created_at, updated_at";
 const locationSelect = "id, scenario_id, nation_id, name, type, description, population, ruler, importance, current_situation, master_secret, created_at, updated_at";
 const factionSelect = "id, scenario_id, nation_id, location_id, name, type, description, goal, leader, allies, enemies, influence_level, current_status, master_secret, created_at, updated_at";
+
+const labels: Record<string, string> = {
+  name: "Nome",
+  title: "Título",
+  type: "Tipo",
+  category: "Categoria",
+  event_type: "Tipo de evento",
+  description: "Descrição",
+  summary: "Resumo",
+  content: "Conteúdo",
+  population: "População",
+  government: "Governo",
+  economy: "Economia",
+  notable_places: "Pontos notáveis",
+  importance: "Importância",
+  current_situation: "Situação atual",
+  dangers: "Perigos",
+  rumors: "Rumores",
+  date_label: "Data",
+  era: "Era",
+  year: "Ano",
+  causes: "Causas",
+  consequences: "Consequências",
+  outcome: "Resultado",
+  origin: "Origem",
+  related_entities: "Entidades relacionadas",
+  adventure_hooks: "Ganchos de aventura",
+  master_notes: "Notas do mestre",
+  master_secret: "Segredo do mestre"
+};
+
+function readableLabel(key: string) {
+  return labels[key] ?? key.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function readableValue(value: unknown) {
+  if (value === null || value === undefined || value === "") return "Não definido";
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function titleOf(item: GenericRecord) {
+  return item.name || item.title || "Registro sem nome";
+}
 
 function FieldView({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -139,6 +199,50 @@ function DangerButton({ children, onClick, disabled }: { children: React.ReactNo
   );
 }
 
+function GenericSection({ title, rows, emptyTitle, emptyText }: { title: string; rows: GenericRecord[]; emptyTitle: string; emptyText: string }) {
+  if (rows.length === 0) {
+    return (
+      <section className="forge-card-accent" style={{ borderStyle: "dashed", padding: "30px" }}>
+        <h2 style={{ marginTop: 0 }}>{emptyTitle}</h2>
+        <p className="forge-muted" style={{ lineHeight: 1.6, marginBottom: 0 }}>{emptyText}</p>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+        <h2 style={{ margin: 0 }}>{title}</h2>
+        <span className="forge-chip">Leitura integrada</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" }}>
+        {rows.map((item) => {
+          const fields = Object.entries(item).filter(([key]) => !["id", "scenario_id", "created_at", "updated_at"].includes(key));
+          return (
+            <article key={item.id} className="forge-panel" style={{ padding: "22px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "14px", alignItems: "flex-start" }}>
+                <div>
+                  <p className="forge-kicker">Registro</p>
+                  <h2 style={{ margin: "6px 0 12px" }}>{titleOf(item)}</h2>
+                </div>
+                {(item.type || item.category || item.event_type) ? <span className="forge-status-pill">{String(item.type || item.category || item.event_type)}</span> : null}
+              </div>
+              <div style={{ display: "grid", gap: "10px" }}>
+                {fields.slice(0, 8).map(([key, value]) => (
+                  <div key={key} className="forge-card" style={{ padding: "14px" }}>
+                    <p className="forge-muted" style={{ margin: 0, fontSize: "13px" }}>{readableLabel(key)}</p>
+                    <p className="forge-muted-strong" style={{ margin: "8px 0 0", lineHeight: 1.55 }}>{readableValue(value)}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
   const router = useRouter();
 
@@ -146,6 +250,10 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
   const [nations, setNations] = useState<Nation[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [factions, setFactions] = useState<Faction[]>([]);
+  const [settlements, setSettlements] = useState<GenericRecord[]>([]);
+  const [characters, setCharacters] = useState<GenericRecord[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<GenericRecord[]>([]);
+  const [loreEntries, setLoreEntries] = useState<GenericRecord[]>([]);
 
   const [activeSection, setActiveSection] = useState<ActiveSection>("overview");
   const [editorMode, setEditorMode] = useState<EditorMode>(null);
@@ -217,21 +325,29 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
         return;
       }
 
-      const [nationsResult, locationsResult, factionsResult] = await Promise.all([
+      const [nationsResult, settlementsResult, locationsResult, factionsResult, charactersResult, timelineResult, loreResult] = await Promise.all([
         supabase.from("nations").select(nationSelect).eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
+        supabase.from("settlements").select("*").eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
         supabase.from("locations").select(locationSelect).eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
-        supabase.from("factions").select(factionSelect).eq("scenario_id", scenarioData.id).order("created_at", { ascending: false })
+        supabase.from("factions").select(factionSelect).eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
+        supabase.from("characters").select("*").eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
+        supabase.from("timeline_events").select("*").eq("scenario_id", scenarioData.id).order("created_at", { ascending: false }),
+        supabase.from("lore_entries").select("*").eq("scenario_id", scenarioData.id).order("created_at", { ascending: false })
       ]);
 
       setScenario(scenarioData);
       setName(scenarioData.name);
       setDescription(scenarioData.description ?? "");
       setNations(nationsResult.data ?? []);
+      setSettlements((settlementsResult.data ?? []) as GenericRecord[]);
       setLocations(locationsResult.data ?? []);
       setFactions(factionsResult.data ?? []);
+      setCharacters((charactersResult.data ?? []) as GenericRecord[]);
+      setTimelineEvents((timelineResult.data ?? []) as GenericRecord[]);
+      setLoreEntries((loreResult.data ?? []) as GenericRecord[]);
       setLoading(false);
 
-      const firstError = nationsResult.error || locationsResult.error || factionsResult.error;
+      const firstError = nationsResult.error || settlementsResult.error || locationsResult.error || factionsResult.error || charactersResult.error || timelineResult.error || loreResult.error;
       if (firstError) setMessage(firstError.message);
     }
 
@@ -289,6 +405,17 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
   function changeSection(section: ActiveSection) {
     if (activeSection !== section) closeEditor();
     setActiveSection(section);
+  }
+
+  function sectionCount(section: ActiveSection) {
+    if (section === "nations") return nations.length;
+    if (section === "settlements") return settlements.length;
+    if (section === "locations") return locations.length;
+    if (section === "factions") return factions.length;
+    if (section === "characters") return characters.length;
+    if (section === "timeline_events") return timelineEvents.length;
+    if (section === "lore_entries") return loreEntries.length;
+    return null;
   }
 
   function openScenarioEditor() {
@@ -733,9 +860,12 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
 
   const stats = [
     ["Nações", nations.length],
+    ["Assentamentos", settlements.length],
     ["Locais", locations.length],
     ["Facções", factions.length],
-    ["Segredos", 0]
+    ["Personagens", characters.length],
+    ["Eventos", timelineEvents.length],
+    ["Lore", loreEntries.length]
   ];
 
   return (
@@ -752,22 +882,23 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
         </div>
 
         <nav style={{ display: "grid", gap: "10px" }}>
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              className={activeSection === section.id ? "forge-nav-item-active" : "forge-nav-item"}
-              onClick={() => changeSection(section.id)}
-              style={{ display: "flex", justifyContent: "space-between", color: "inherit", cursor: "pointer", textAlign: "left" }}
-            >
-              <span>{section.label}</span>
-              {section.id === "nations" ? <small>{nations.length}</small> : null}
-              {section.id === "locations" ? <small>{locations.length}</small> : null}
-              {section.id === "factions" ? <small>{factions.length}</small> : null}
-            </button>
-          ))}
+          {sections.map((section) => {
+            const count = sectionCount(section.id);
+            return (
+              <button
+                key={section.id}
+                className={activeSection === section.id ? "forge-nav-item-active" : "forge-nav-item"}
+                onClick={() => changeSection(section.id)}
+                style={{ display: "flex", justifyContent: "space-between", color: "inherit", cursor: "pointer", textAlign: "left" }}
+              >
+                <span>{section.label}</span>
+                {count !== null ? <small>{count}</small> : null}
+              </button>
+            );
+          })}
         </nav>
 
-        <Link href={`/scenarios/${scenario.id}/atlas`} className="forge-link-pill" style={{ marginTop: "22px", textAlign: "center" }}>Abrir Atlas</Link>
+        <Link href={`/scenarios/${scenario.id}/atlas`} className="forge-link-pill" style={{ marginTop: "22px", textAlign: "center" }}>Abrir modo Atlas</Link>
       </aside>
 
       <section style={{ padding: "34px", overflow: "auto" }}>
@@ -844,6 +975,8 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
           </section>
         ) : null}
 
+        {activeSection === "settlements" ? <GenericSection title="Assentamentos" rows={settlements} emptyTitle="Nenhum assentamento registrado." emptyText="Quando cidades, vilas ou capitais forem registradas nesta tabela, elas aparecerão aqui na tela principal." /> : null}
+
         {activeSection === "locations" ? (
           <section>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
@@ -907,8 +1040,10 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
           </section>
         ) : null}
 
-        {activeSection === "characters" ? <EmptyState title="Personagens ainda não foram ativados." text="Este módulo está reservado para a próxima etapa do Master Forge." actionLabel="Voltar para visão geral" onAction={() => changeSection("overview")} /> : null}
-        {activeSection === "secrets" ? <EmptyState title="O grimório de segredos ainda está selado." text="Este módulo será usado para notas privadas, rumores e verdades ocultas." actionLabel="Voltar para visão geral" onAction={() => changeSection("overview")} /> : null}
+        {activeSection === "characters" ? <GenericSection title="Personagens" rows={characters} emptyTitle="Nenhum personagem registrado." emptyText="Quando NPCs, aliados e antagonistas forem registrados, eles aparecerão aqui na tela principal." /> : null}
+        {activeSection === "timeline_events" ? <GenericSection title="Linha do tempo" rows={timelineEvents} emptyTitle="Nenhum evento histórico registrado." emptyText="Eventos, eras e consequências do cenário aparecerão aqui." /> : null}
+        {activeSection === "lore_entries" ? <GenericSection title="Lore" rows={loreEntries} emptyTitle="Nenhuma entrada de lore registrada." emptyText="Mitos, religiões, rumores e notas de mundo aparecerão aqui." /> : null}
+        {activeSection === "secrets" ? <GenericSection title="Segredos" rows={loreEntries.filter((entry) => entry.master_secret || entry.master_notes || entry.secrets)} emptyTitle="O grimório de segredos ainda está selado." emptyText="Segredos e notas privadas podem ser centralizados aqui conforme os módulos avançados evoluírem." /> : null}
       </section>
 
       <aside style={{ borderLeft: "1px solid var(--forge-border)", padding: "24px", background: "rgba(2,6,23,0.42)", overflow: "auto" }}>
@@ -916,7 +1051,7 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
           <section className="forge-card-accent" style={{ padding: "20px" }}>
             <p className="forge-kicker">Painel de edição</p>
             <h2 style={{ margin: "8px 0" }}>Selecione uma ação</h2>
-            <p className="forge-muted" style={{ lineHeight: 1.6 }}>Edite o cenário ou crie registros usando os botões da área principal.</p>
+            <p className="forge-muted" style={{ lineHeight: 1.6 }}>Nações, Locais e Facções já podem ser criados e editados aqui. Os demais módulos agora aparecem nesta tela e serão os próximos a receber edição completa.</p>
           </section>
         ) : null}
 
