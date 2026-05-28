@@ -15,15 +15,15 @@ type Scenario = {
 };
 
 const quickActions = [
-  ["+ Nacao", "Reinos, imperios e povos"],
-  ["+ Local", "Cidades, vilas e ruinas"],
-  ["+ Faccao", "Ordens, guildas e cultos"],
+  ["+ Nação", "Reinos, impérios e povos"],
+  ["+ Local", "Cidades, vilas e ruínas"],
+  ["+ Facção", "Ordens, guildas e cultos"],
   ["+ Personagem", "NPCs importantes"],
   ["+ Segredo", "Notas privadas do mestre"],
   ["+ Gancho", "Ideias de aventura"]
 ];
 
-const worldTree = ["Visao geral", "Nacoes", "Locais", "Faccoes", "Personagens", "Segredos"];
+const worldTree = ["Visão geral", "Nações", "Locais", "Facções", "Personagens", "Segredos"];
 
 export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
   const router = useRouter();
@@ -51,7 +51,7 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
         .single();
 
       if (error) {
-        setMessage("Cenario nao encontrado ou sem permissao de acesso.");
+        setMessage("Cenário não encontrado ou sem permissão de acesso.");
         setLoading(false);
         return;
       }
@@ -69,7 +69,7 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
     if (!scenario) return;
 
     if (!name.trim()) {
-      setMessage("O nome do cenario nao pode ficar vazio.");
+      setMessage("O nome do cenário não pode ficar vazio.");
       return;
     }
 
@@ -98,17 +98,15 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
     setScenario(data);
     setName(data.name);
     setDescription(data.description ?? "");
-    setMessage("Alteracoes salvas com sucesso.");
+    setMessage("Registro gravado na Forja.");
   }
-
-  const pageBackground = "radial-gradient(circle at 16% 0%, rgba(245,158,11,0.15), transparent 24rem), radial-gradient(circle at 85% 12%, rgba(127,29,29,0.12), transparent 26rem), linear-gradient(135deg, #050505, #0b1020 48%, #111827)";
 
   if (loading) {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: pageBackground, color: "#f8fafc", fontFamily: "Arial, Helvetica, sans-serif" }}>
-        <div style={{ border: "1px solid rgba(245,158,11,0.26)", borderRadius: "28px", padding: "30px", background: "rgba(15,23,42,0.82)", boxShadow: "0 24px 80px rgba(0,0,0,0.32)" }}>
-          <p style={{ color: "#f59e0b", fontWeight: 900, margin: 0, letterSpacing: "0.16em", textTransform: "uppercase" }}>Master Forge</p>
-          <h1 style={{ marginBottom: 0 }}>Abrindo seu grimorio...</h1>
+      <main className="forge-page" style={{ display: "grid", placeItems: "center" }}>
+        <div className="forge-card-accent" style={{ padding: "30px", boxShadow: "0 24px 80px rgba(0,0,0,0.32)" }}>
+          <p className="forge-kicker">Master Forge</p>
+          <h1 style={{ marginBottom: 0 }}>Abrindo seu grimório...</h1>
         </div>
       </main>
     );
@@ -116,108 +114,108 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
 
   if (!scenario) {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: pageBackground, color: "#f8fafc", fontFamily: "Arial, Helvetica, sans-serif" }}>
+      <main className="forge-page" style={{ display: "grid", placeItems: "center" }}>
         <section style={{ border: "1px solid rgba(248,113,113,0.3)", borderRadius: "28px", padding: "30px", background: "rgba(127,29,29,0.18)", maxWidth: "560px" }}>
           <p style={{ color: "#fca5a5", fontWeight: 900, marginTop: 0, letterSpacing: "0.14em", textTransform: "uppercase" }}>Acesso negado</p>
-          <h1>Cenario nao encontrado</h1>
-          <p style={{ color: "#cbd5e1", lineHeight: 1.6 }}>{message}</p>
-          <Link href="/dashboard" style={{ color: "#111827", textDecoration: "none", display: "inline-block", background: "linear-gradient(135deg, #f59e0b, #fbbf24)", padding: "12px 18px", borderRadius: "999px", fontWeight: 900 }}>Voltar ao dashboard</Link>
+          <h1>Cenário não encontrado</h1>
+          <p className="forge-muted-strong" style={{ lineHeight: 1.6 }}>{message}</p>
+          <Link href="/dashboard" className="forge-link-primary">Voltar ao Arquivo dos Reinos</Link>
         </section>
       </main>
     );
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: pageBackground, color: "#f8fafc", fontFamily: "Arial, Helvetica, sans-serif" }}>
-      <header style={{ height: "74px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", borderBottom: "1px solid rgba(148,163,184,0.16)", background: "rgba(2,6,23,0.78)", backdropFilter: "blur(18px)", position: "sticky", top: 0, zIndex: 10 }}>
+    <main className="forge-page" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+      <header style={{ height: "74px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", borderBottom: "1px solid var(--forge-border)", background: "rgba(2,6,23,0.78)", backdropFilter: "blur(18px)", position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-          <Link href="/dashboard" style={{ color: "#94a3b8", textDecoration: "none" }}>← Arquivo dos Reinos</Link>
-          <span style={{ width: "1px", height: "28px", background: "rgba(148,163,184,0.22)" }} />
+          <Link href="/dashboard" style={{ color: "var(--forge-muted)", textDecoration: "none" }}>← Arquivo dos Reinos</Link>
+          <span style={{ width: "1px", height: "28px", background: "var(--forge-border)" }} />
           <strong style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>Master Forge</strong>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ color: message.includes("sucesso") ? "#86efac" : "#94a3b8", fontSize: "14px" }}>{message || "Pronto para editar"}</span>
-          <button onClick={handleSave} disabled={saving} style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#111827", border: 0, padding: "12px 18px", borderRadius: "999px", fontWeight: 950, cursor: "pointer", opacity: saving ? 0.7 : 1 }}>{saving ? "Salvando..." : "Salvar alteracoes"}</button>
+          <span style={{ color: message.includes("Forja") ? "var(--forge-success)" : "var(--forge-muted)", fontSize: "14px" }}>{message || "Pronto para editar"}</span>
+          <button onClick={handleSave} disabled={saving} className="forge-button-primary" style={{ opacity: saving ? 0.7 : 1 }}>{saving ? "Gravando..." : "Registrar na Forja"}</button>
         </div>
       </header>
 
       <div style={{ display: "grid", gridTemplateColumns: "316px minmax(620px, 1fr) 322px", minHeight: "calc(100vh - 74px)" }}>
-        <aside style={{ borderRight: "1px solid rgba(148,163,184,0.16)", padding: "24px", background: "rgba(2,6,23,0.58)" }}>
-          <p style={{ color: "#f59e0b", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 0, fontSize: "13px" }}>Arvore do mundo</p>
-          <div style={{ border: "1px solid rgba(245,158,11,0.26)", borderRadius: "24px", padding: "18px", background: "rgba(245,158,11,0.06)", marginBottom: "18px" }}>
+        <aside style={{ borderRight: "1px solid var(--forge-border)", padding: "24px", background: "rgba(2,6,23,0.58)" }}>
+          <p className="forge-kicker">Árvore do mundo</p>
+          <div className="forge-card-accent" style={{ padding: "18px", marginTop: "14px", marginBottom: "18px" }}>
             <strong style={{ display: "block", fontSize: "17px" }}>{scenario.name}</strong>
-            <p style={{ color: "#94a3b8", lineHeight: 1.5, margin: "8px 0 0", fontSize: "14px" }}>A estrutura do mundo vai nascer aqui: nacoes, cidades, faccoes, personagens e segredos.</p>
+            <p className="forge-muted" style={{ lineHeight: 1.5, margin: "8px 0 0", fontSize: "14px" }}>A estrutura do mundo nasce aqui: nações, cidades, facções, personagens e segredos.</p>
           </div>
 
           <div style={{ display: "grid", gap: "10px" }}>
             {worldTree.map((item, index) => (
-              <div key={item} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 13px", borderRadius: "16px", background: index === 0 ? "rgba(245,158,11,0.14)" : "rgba(15,23,42,0.66)", border: `1px solid ${index === 0 ? "rgba(245,158,11,0.26)" : "rgba(148,163,184,0.16)"}`, color: index === 0 ? "#fbbf24" : "#cbd5e1" }}>
+              <div key={item} className={index === 0 ? "forge-nav-item-active" : "forge-nav-item"} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span>{index === 0 ? "▾" : "▸"} {item}</span>
-                {index > 0 ? <small style={{ color: "#94a3b8" }}>0</small> : null}
+                {index > 0 ? <small style={{ color: "var(--forge-muted)" }}>0</small> : null}
               </div>
             ))}
           </div>
 
-          <div style={{ border: "1px dashed rgba(245,158,11,0.34)", borderRadius: "22px", padding: "18px", background: "rgba(245,158,11,0.05)", marginTop: "22px" }}>
-            <strong>Nenhuma nacao ainda</strong>
-            <p style={{ color: "#94a3b8", lineHeight: 1.55, margin: "8px 0 14px", fontSize: "14px" }}>Nacoes organizam reinos, imperios, povos e culturas dentro do seu cenario.</p>
-            <button style={{ width: "100%", background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#111827", border: 0, padding: "12px", borderRadius: "999px", fontWeight: 950, cursor: "pointer" }}>Criar primeira nacao</button>
+          <div style={{ border: "1px dashed rgba(197,124,38,0.42)", borderRadius: "22px", padding: "18px", background: "rgba(197,124,38,0.07)", marginTop: "22px" }}>
+            <strong>Nenhuma nação ainda</strong>
+            <p className="forge-muted" style={{ lineHeight: 1.55, margin: "8px 0 14px", fontSize: "14px" }}>Nações organizam reinos, impérios, povos e culturas dentro do seu cenário.</p>
+            <button className="forge-button-primary" style={{ width: "100%" }}>Erguer primeira nação</button>
           </div>
         </aside>
 
         <section style={{ padding: "34px", overflow: "auto" }}>
           <div style={{ maxWidth: "980px" }}>
-            <p style={{ color: "#f59e0b", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0, fontSize: "13px" }}>Visao geral do cenario</p>
+            <p className="forge-kicker">Visão geral do cenário</p>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "24px", marginTop: "10px", marginBottom: "26px" }}>
               <div>
                 <h1 style={{ fontSize: "54px", lineHeight: 0.96, margin: 0, letterSpacing: "-0.06em" }}>{scenario.name}</h1>
-                <p style={{ color: "#94a3b8", lineHeight: 1.65, maxWidth: "720px", fontSize: "16px" }}>Construa a premissa do mundo, defina o tom da campanha e deixe pronto o esqueleto para nacoes, cidades e conflitos.</p>
+                <p className="forge-muted" style={{ lineHeight: 1.65, maxWidth: "720px", fontSize: "16px" }}>Construa a crônica inicial, defina o tom da campanha e deixe pronto o esqueleto para nações, cidades e conflitos.</p>
               </div>
-              <span style={{ color: "#fbbf24", border: "1px solid rgba(245,158,11,0.26)", borderRadius: "999px", padding: "9px 12px", background: "rgba(245,158,11,0.08)", whiteSpace: "nowrap", fontSize: "13px", fontWeight: 850 }}>Cenario pessoal</span>
+              <span className="forge-status-pill">Mundo forjado</span>
             </div>
 
-            <div style={{ display: "grid", gap: "18px", border: "1px solid rgba(148,163,184,0.16)", borderRadius: "30px", padding: "26px", background: "linear-gradient(180deg, rgba(17,24,39,0.94), rgba(10,16,30,0.86))", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
+            <div className="forge-panel" style={{ display: "grid", gap: "18px", padding: "26px" }}>
               <label>
-                <span style={{ display: "block", color: "#cbd5e1", marginBottom: "8px", fontSize: "14px" }}>Nome publico do cenario</span>
-                <input value={name} onChange={(event) => setName(event.target.value)} style={{ width: "100%", boxSizing: "border-box", padding: "15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none", fontSize: "15px" }} />
+                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Nome público do cenário</span>
+                <input className="forge-input" value={name} onChange={(event) => setName(event.target.value)} />
               </label>
 
               <label>
-                <span style={{ display: "block", color: "#cbd5e1", marginBottom: "8px", fontSize: "14px" }}>Premissa do mundo</span>
-                <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Ex: Um arquipelago marcado por tempestades eternas, casas mercantis rivais e deuses antigos esquecidos sob o mar." style={{ width: "100%", boxSizing: "border-box", minHeight: "190px", padding: "15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
+                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Crônica inicial</span>
+                <textarea className="forge-textarea" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Ex: Um arquipélago marcado por tempestades eternas, casas mercantis rivais e deuses antigos esquecidos sob o mar." style={{ minHeight: "190px" }} />
               </label>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginTop: "22px" }}>
               {quickActions.map(([title, text]) => (
-                <button key={title} style={{ textAlign: "left", border: "1px solid rgba(148,163,184,0.16)", borderRadius: "20px", padding: "17px", background: "rgba(15,23,42,0.62)", color: "#f8fafc", cursor: "pointer" }}>
+                <button key={title} className="forge-card" style={{ textAlign: "left", padding: "17px", color: "var(--forge-text)", cursor: "pointer" }}>
                   <strong style={{ display: "block" }}>{title}</strong>
-                  <small style={{ color: "#94a3b8", display: "block", marginTop: "6px" }}>{text}</small>
+                  <small className="forge-muted" style={{ display: "block", marginTop: "6px" }}>{text}</small>
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        <aside style={{ borderLeft: "1px solid rgba(148,163,184,0.16)", padding: "24px", background: "rgba(2,6,23,0.54)" }}>
-          <p style={{ color: "#f59e0b", fontWeight: 900, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 0, fontSize: "13px" }}>Painel do mestre</p>
-          <div style={{ display: "grid", gap: "14px" }}>
+        <aside style={{ borderLeft: "1px solid var(--forge-border)", padding: "24px", background: "rgba(2,6,23,0.54)" }}>
+          <p className="forge-kicker">Painel do Mestre</p>
+          <div style={{ display: "grid", gap: "14px", marginTop: "14px" }}>
             {[
-              ["Status", "Em construcao"],
-              ["Nacoes", "0 criadas"],
+              ["Status", "Em construção"],
+              ["Nações", "0 criadas"],
               ["Locais", "0 registrados"],
-              ["Faccoes", "0 ativas"]
+              ["Facções", "0 ativas"]
             ].map(([label, value]) => (
-              <div key={label} style={{ border: "1px solid rgba(148,163,184,0.16)", borderRadius: "18px", padding: "14px", background: "rgba(15,23,42,0.72)" }}>
-                <p style={{ color: "#94a3b8", margin: 0, fontSize: "13px" }}>{label}</p>
+              <div key={label} className="forge-card" style={{ padding: "14px" }}>
+                <p className="forge-muted" style={{ margin: 0, fontSize: "13px" }}>{label}</p>
                 <strong style={{ display: "block", marginTop: "5px" }}>{value}</strong>
               </div>
             ))}
           </div>
 
-          <div style={{ marginTop: "22px", border: "1px solid rgba(245,158,11,0.26)", borderRadius: "24px", padding: "18px", background: "rgba(245,158,11,0.07)" }}>
-            <strong style={{ color: "#fbbf24" }}>Proxima etapa</strong>
-            <p style={{ color: "#94a3b8", lineHeight: 1.55, fontSize: "14px" }}>Transformar a arvore do mundo em dados reais: primeiro nacoes, depois locais e faccoes.</p>
+          <div className="forge-card-accent" style={{ marginTop: "22px", padding: "18px" }}>
+            <strong style={{ color: "var(--forge-gold-light)" }}>Próxima etapa</strong>
+            <p className="forge-muted" style={{ lineHeight: 1.55, fontSize: "14px" }}>Transformar a árvore do mundo em dados reais: primeiro nações, depois locais e facções.</p>
           </div>
         </aside>
       </div>
