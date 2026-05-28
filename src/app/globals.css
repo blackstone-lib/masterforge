@@ -1,11 +1,17 @@
 :root {
   --forge-bg: #050505;
+  --forge-bg-soft: #0b1020;
   --forge-panel: rgba(15, 23, 42, 0.74);
+  --forge-panel-strong: rgba(17, 24, 39, 0.92);
   --forge-border: rgba(148, 163, 184, 0.16);
+  --forge-border-strong: rgba(245, 158, 11, 0.26);
   --forge-gold: #f59e0b;
   --forge-gold-light: #fbbf24;
   --forge-text: #f8fafc;
   --forge-muted: #94a3b8;
+  --forge-muted-strong: #cbd5e1;
+  --forge-danger: #fca5a5;
+  --forge-success: #86efac;
 }
 
 * {
@@ -43,4 +49,81 @@ input:focus,
 textarea:focus {
   border-color: rgba(245, 158, 11, 0.52) !important;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.forge-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at 18% 0%, rgba(245, 158, 11, 0.15), transparent 26rem),
+    radial-gradient(circle at 82% 12%, rgba(127, 29, 29, 0.14), transparent 28rem),
+    linear-gradient(135deg, #050505, #0b1020 52%, #111827);
+  color: var(--forge-text);
+}
+
+.forge-kicker {
+  color: var(--forge-gold);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.forge-panel {
+  border: 1px solid var(--forge-border);
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(10, 16, 30, 0.86));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+}
+
+.forge-card {
+  border: 1px solid var(--forge-border);
+  border-radius: 22px;
+  background: var(--forge-panel);
+}
+
+.forge-card-accent {
+  border: 1px solid var(--forge-border-strong);
+  border-radius: 24px;
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.forge-button-primary {
+  background: linear-gradient(135deg, var(--forge-gold), var(--forge-gold-light));
+  border: 0;
+  border-radius: 999px;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 950;
+  padding: 12px 18px;
+  box-shadow: 0 18px 45px rgba(245, 158, 11, 0.18);
+}
+
+.forge-button-ghost {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.45);
+  color: var(--forge-muted-strong);
+  cursor: pointer;
+  font-weight: 850;
+  padding: 12px 18px;
+}
+
+.forge-input,
+.forge-textarea {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  background: rgba(2, 6, 23, 0.68);
+  color: var(--forge-text);
+  outline: none;
+  padding: 15px;
+}
+
+.forge-textarea {
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.forge-muted {
+  color: var(--forge-muted);
 }
