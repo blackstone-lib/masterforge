@@ -31,7 +31,7 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
     createLabel: "Criar assentamento",
     emptyTitle: "Nenhum assentamento registrado.",
     emptyText: "Cidades, vilas, capitais e povoados aparecerão aqui.",
-    selectFields: "id, scenario_id, name, type, description, population, government, economy, notable_places, importance, current_situation, master_secret, created_at, updated_at",
+    selectFields: "id, scenario_id, name, type, description, population, government, economy, notable_places, created_at, updated_at",
     fields: [
       field({ key: "name", label: "Nome", required: true, priority: 1 }),
       field({ key: "type", label: "Tipo", type: "select", options: ["Vila", "Cidade", "Capital", "Fortaleza", "Porto", "Ruína habitada"], priority: 2 }),
@@ -39,10 +39,7 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
       field({ key: "population", label: "População", inputType: "number", priority: 4 }),
       field({ key: "government", label: "Governo" }),
       field({ key: "economy", label: "Economia", type: "textarea" }),
-      field({ key: "notable_places", label: "Pontos notáveis", type: "textarea" }),
-      field({ key: "importance", label: "Importância", type: "textarea" }),
-      field({ key: "current_situation", label: "Situação atual", type: "textarea" }),
-      field({ key: "master_secret", label: "Segredo do mestre", type: "textarea" })
+      field({ key: "notable_places", label: "Pontos notáveis", type: "textarea" })
     ]
   },
   locations: {
