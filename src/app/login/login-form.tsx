@@ -47,30 +47,30 @@ export function LoginForm() {
       return;
     }
 
-    setMessage("Conta criada. Confira seu e-mail se o Supabase pedir confirmacao.");
+    setMessage("Conta criada. Confira seu e-mail se o Supabase pedir confirmação.");
   }
 
   return (
     <form style={{ display: "grid", gap: "18px" }}>
       <label>
-        <span style={{ display: "block", color: "#cbd5e1", marginBottom: "9px", fontSize: "14px" }}>E-mail</span>
+        <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "9px", fontSize: "14px" }}>E-mail</span>
         <input
           type="email"
           placeholder="voce@email.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          style={{ width: "100%", boxSizing: "border-box", padding: "14px 15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none" }}
+          className="forge-input"
         />
       </label>
 
       <label>
-        <span style={{ display: "block", color: "#cbd5e1", marginBottom: "9px", fontSize: "14px" }}>Senha</span>
+        <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "9px", fontSize: "14px" }}>Senha</span>
         <input
           type="password"
           placeholder="********"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          style={{ width: "100%", boxSizing: "border-box", padding: "14px 15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none" }}
+          className="forge-input"
         />
       </label>
 
@@ -78,22 +78,24 @@ export function LoginForm() {
         type="button"
         onClick={handleSignIn}
         disabled={loading}
-        style={{ marginTop: "8px", background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#111827", border: 0, padding: "15px", borderRadius: "999px", fontWeight: 900, cursor: "pointer", opacity: loading ? 0.72 : 1 }}
+        className="forge-button-primary"
+        style={{ marginTop: "8px", opacity: loading ? 0.72 : 1 }}
       >
-        {loading ? "Aguarde..." : "Entrar na forja"}
+        {loading ? "Aguarde..." : "Entrar na Forja"}
       </button>
 
       <button
         type="button"
         onClick={handleSignUp}
         disabled={loading}
-        style={{ background: "rgba(15,23,42,0.78)", color: "#f8fafc", border: "1px solid rgba(148,163,184,0.24)", padding: "15px", borderRadius: "999px", fontWeight: 800, cursor: "pointer", opacity: loading ? 0.72 : 1 }}
+        className="forge-button-ghost"
+        style={{ opacity: loading ? 0.72 : 1 }}
       >
         Criar conta
       </button>
 
       {message ? (
-        <p style={{ margin: 0, color: message.toLowerCase().includes("created") || message.toLowerCase().includes("criada") ? "#86efac" : "#fca5a5", lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: message.toLowerCase().includes("created") || message.toLowerCase().includes("criada") ? "var(--forge-success)" : "var(--forge-danger)", lineHeight: 1.5 }}>
           {message}
         </p>
       ) : null}
