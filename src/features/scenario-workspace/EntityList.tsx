@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EntityDetailsModal } from "./EntityDetailsModal";
-import { relationName, singularLabelOf, titleOf } from "./entity-utils";
+import { relationName, singularLabelOf, titleOf, valueText } from "./entity-utils";
 import type { EntityRecord, EntityRows, EntitySection, SectionConfig } from "./types";
 
 type EntityListProps = {
@@ -10,6 +10,7 @@ type EntityListProps = {
   config: SectionConfig;
   rows: EntityRows;
   saving: boolean;
+  search: string;
   onCreate: (section: EntitySection, extra?: Record<string, string>) => void;
   onEdit: (section: EntitySection, item: EntityRecord) => void;
   onDelete: (section: EntitySection, item: EntityRecord) => void;
@@ -25,12 +26,34 @@ function EmptyBox({ title, text, actionLabel, onAction }: { title: string; text:
   );
 }
 
-export function EntityList({ section, config, rows, saving, onCreate, onEdit, onDelete }: EntityListProps) {
+function matchesSearch(item: EntityRecord, search: string) {
+  if (!search.trim()) return true;
+  const normalized = search.trim().toLowerCase();
+  return Object.values(item).some((value) => valueText(value).toLowerCase().includes(normalized));
+}
+
+export function EntityList({ section, config, rows, saving, search, onCreate, onEdit, onDelete }: EntityListProps) {
   const sectionRows = rows[section];
+  const filteredRows = sectionRows.filter((item) => matchesSearch(item, search));
   const [selectedItem, setSelectedItem] = useState<EntityRecord | null>(null);
 
   if (sectionRows.length === 0) {
     return <EmptyBox title={config.emptyTitle} text={config.emptyText} actionLabel={config.createLabel} onAction={() => onCreate(section)} />;
+  }
+
+  if (filteredRows.length === 0) {
+    return (
+      <section>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <div>
+            <p className="forge-kicker">Editor</p>
+            <h2 style={{ margin: "6px 0 0" }}>{config.label}</h2>
+          </div>
+          <button className="forge-button-primary" onClick={() => onCreate(section)}>+ {config.createLabel}</button>
+        </div>
+        <EmptyBox title="Nenhum resultado encontrado." text="Tente buscar por outro nome, descrição, vínculo ou detalhe deste módulo." />
+      </section>
+    );
   }
 
   return (
@@ -44,7 +67,7 @@ export function EntityList({ section, config, rows, saving, onCreate, onEdit, on
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 }}>
-        {sectionRows.map((item) => (
+        {filteredRows.map((item) => (
           <article
             key={item.id}
             className="forge-card"
