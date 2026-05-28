@@ -1,4 +1,4 @@
-import { ScenarioAtlasClient } from "./scenario-atlas-client";
+import { ScenarioAtlas } from "@/features/scenario-atlas/ScenarioAtlas";
 
 type ScenarioAtlasPageProps = {
   params: Promise<{ id: string }>;
@@ -7,5 +7,5 @@ type ScenarioAtlasPageProps = {
 export default async function ScenarioAtlasPage({ params }: ScenarioAtlasPageProps) {
   const { id } = await params;
 
-  return <ScenarioAtlasClient scenarioId={id} />;
+  return <ScenarioAtlas scenarioId={id} />;
 }
