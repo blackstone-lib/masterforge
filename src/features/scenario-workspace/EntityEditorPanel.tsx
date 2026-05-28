@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { fieldLabels } from "./section-config";
-import type { EditorMode, EntityRows, EntitySection, FieldConfig, SectionConfig } from "./types";
+import type { EditorMode, EntityRows, EntitySection, FieldConfig, RelationKey, SectionConfig } from "./types";
 
 type EntityEditorPanelProps = {
   editorMode: EditorMode;
@@ -43,6 +43,14 @@ function renderField(field: FieldConfig, value: string, onChange: (value: string
   }
 
   return <input className="forge-input" type={field.inputType ?? "text"} placeholder={field.placeholder} value={value} onChange={(event) => onChange(event.target.value)} />;
+}
+
+function relationOptions(rows: EntityRows, relation: RelationKey) {
+  if (relation === "nation_id") return rows.nations.map((item) => ({ id: item.id, label: String(item.name ?? "Nação sem nome") }));
+  if (relation === "location_id") return rows.locations.map((item) => ({ id: item.id, label: String(item.name ?? "Local sem nome") }));
+  if (relation === "faction_id") return rows.factions.map((item) => ({ id: item.id, label: String(item.name ?? "Facção sem nome") }));
+  if (relation === "character_id") return rows.characters.map((item) => ({ id: item.id, label: String(item.name ?? "Personagem sem nome") }));
+  return rows.timeline_events.map((item) => ({ id: item.id, label: String(item.title ?? "Evento sem título") }));
 }
 
 export function EntityEditorPanel({
@@ -93,8 +101,7 @@ export function EntityEditorPanel({
               <FormLabel key={relation} label={fieldLabels[relation]}>
                 <select className="forge-input" value={formData[relation] ?? ""} onChange={(event) => onFieldChange(relation, event.target.value)}>
                   <option value="">Nenhum</option>
-                  {relation === "nation_id" ? rows.nations.map((item) => <option key={item.id} value={item.id}>{String(item.name ?? "Nação sem nome")}</option>) : null}
-                  {relation === "location_id" ? rows.locations.map((item) => <option key={item.id} value={item.id}>{String(item.name ?? "Local sem nome")}</option>) : null}
+                  {relationOptions(rows, relation).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
                 </select>
               </FormLabel>
             ))}
