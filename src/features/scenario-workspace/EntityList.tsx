@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EntityDetailsModal } from "./EntityDetailsModal";
-import { relationName, titleOf } from "./entity-utils";
+import { relationName, singularLabelOf, titleOf } from "./entity-utils";
 import type { EntityRecord, EntityRows, EntitySection, SectionConfig } from "./types";
 
 type EntityListProps = {
@@ -28,16 +28,6 @@ function EmptyBox({ title, text, actionLabel, onAction }: { title: string; text:
 export function EntityList({ section, config, rows, saving, onCreate, onEdit, onDelete }: EntityListProps) {
   const sectionRows = rows[section];
   const [selectedItem, setSelectedItem] = useState<EntityRecord | null>(null);
-
-  function editFromModal(item: EntityRecord) {
-    setSelectedItem(null);
-    onEdit(section, item);
-  }
-
-  async function deleteFromModal(item: EntityRecord) {
-    setSelectedItem(null);
-    onDelete(section, item);
-  }
 
   if (sectionRows.length === 0) {
     return <EmptyBox title={config.emptyTitle} text={config.emptyText} actionLabel={config.createLabel} onAction={() => onCreate(section)} />;
@@ -72,7 +62,7 @@ export function EntityList({ section, config, rows, saving, onCreate, onEdit, on
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
                 <div>
-                  <p className="forge-kicker">{config.label.slice(0, -1) || "Registro"}</p>
+                  <p className="forge-kicker">{singularLabelOf(section)}</p>
                   <h3 style={{ margin: "8px 0 0", fontSize: 24, lineHeight: 1.08 }}>{String(titleOf(item, config))}</h3>
                 </div>
                 {(item.type || item.category || item.event_type) ? (
@@ -92,29 +82,23 @@ export function EntityList({ section, config, rows, saving, onCreate, onEdit, on
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }} onClick={(event) => event.stopPropagation()}>
               <button className="forge-button-ghost" onClick={() => setSelectedItem(item)}>Abrir</button>
               <button className="forge-button-ghost" onClick={() => onEdit(section, item)}>Editar</button>
-
-              {section === "nations" ? (
-                <>
-                  <button className="forge-button-ghost" onClick={() => onCreate("locations", { nation_id: item.id })}>Novo local</button>
-                  <button className="forge-button-ghost" onClick={() => onCreate("factions", { nation_id: item.id })}>Nova facção</button>
-                </>
-              ) : null}
-
-              {section === "locations" ? (
-                <button className="forge-button-ghost" onClick={() => onCreate("factions", { nation_id: String(item.nation_id ?? ""), location_id: item.id })}>Nova facção</button>
-              ) : null}
-
-              {section === "factions" ? (
-                <button className="forge-button-ghost" onClick={() => onCreate("characters", { nation_id: String(item.nation_id ?? ""), location_id: String(item.location_id ?? ""), faction_id: item.id })}>Novo personagem</button>
-              ) : null}
-
-              {section === "characters" ? (
-                <button className="forge-button-ghost" onClick={() => onCreate("timeline_events", { nation_id: String(item.nation_id ?? ""), location_id: String(item.location_id ?? ""), character_id: item.id, faction_id: String(item.faction_id ?? "") })}>Novo evento</button>
-              ) : null}
-
-              {section === "timeline_events" ? (
-                <button className="forge-button-ghost" onClick={() => onCreate("lore_entries", { event_id: item.id, character_id: String(item.character_id ?? ""), location_id: String(item.location_id ?? ""), faction_id: String(item.faction_id ?? "") })}>Nova lore</button>
-              ) : null}
+              <button
+                type="button"
+                onClick={() => onDelete(section, item)}
+                disabled={saving}
+                style={{
+                  border: "1px solid rgba(248,113,113,0.38)",
+                  borderRadius: 999,
+                  padding: "12px 18px",
+                  background: "rgba(127,29,29,0.24)",
+                  color: "var(--forge-danger)",
+                  fontWeight: 850,
+                  cursor: saving ? "not-allowed" : "pointer",
+                  opacity: saving ? 0.68 : 1
+                }}
+              >
+                Apagar
+              </button>
             </div>
           </article>
         ))}
@@ -126,10 +110,7 @@ export function EntityList({ section, config, rows, saving, onCreate, onEdit, on
           config={config}
           item={selectedItem}
           rows={rows}
-          saving={saving}
           onClose={() => setSelectedItem(null)}
-          onEdit={editFromModal}
-          onDelete={deleteFromModal}
         />
       ) : null}
     </section>
