@@ -20,7 +20,7 @@ export type ActiveSection =
 export type EntitySection = Exclude<ActiveSection, "overview">;
 export type EditorMode = "scenario" | "entity-create" | "entity-edit" | null;
 
-export type RelationKey = "nation_id" | "location_id";
+export type RelationKey = "nation_id" | "location_id" | "faction_id" | "character_id" | "event_id";
 
 export type EntityRecord = Record<string, unknown> & {
   id: string;
@@ -32,6 +32,9 @@ export type EntityRecord = Record<string, unknown> & {
   event_type?: string | null;
   nation_id?: string | null;
   location_id?: string | null;
+  faction_id?: string | null;
+  character_id?: string | null;
+  event_id?: string | null;
 };
 
 export type FieldConfig = {
