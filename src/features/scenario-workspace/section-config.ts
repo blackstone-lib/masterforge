@@ -1,6 +1,14 @@
-import type { ActiveSection, EntitySection, FieldConfig, SectionConfig } from "./types";
+import type { ActiveSection, EntitySection, FieldConfig, RelationKey, SectionConfig } from "./types";
 
 const field = (config: FieldConfig): FieldConfig => config;
+
+export const relationLabels: Record<RelationKey, string> = {
+  nation_id: "Nação vinculada",
+  location_id: "Local vinculado",
+  faction_id: "Facção vinculada",
+  character_id: "Personagem vinculado",
+  event_id: "Evento vinculado"
+};
 
 export const sectionConfigs: Record<EntitySection, SectionConfig> = {
   nations: {
@@ -94,7 +102,8 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
     createLabel: "Criar personagem",
     emptyTitle: "Nenhum personagem registrado.",
     emptyText: "Crie NPCs, aliados, antagonistas e figuras importantes do cenário.",
-    selectFields: "id, scenario_id, name, title, type, race, class_role, description, personality, background, goals, secrets, created_at, updated_at",
+    selectFields: "id, scenario_id, nation_id, location_id, faction_id, name, title, type, race, class_role, description, personality, background, goals, secrets, created_at, updated_at",
+    relations: ["nation_id", "location_id", "faction_id"],
     fields: [
       field({ key: "name", label: "Nome", required: true, priority: 1 }),
       field({ key: "title", label: "Título", priority: 2 }),
@@ -116,7 +125,8 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
     createLabel: "Criar evento",
     emptyTitle: "Nenhum evento histórico registrado.",
     emptyText: "Registre eras, guerras, rituais, catástrofes e consequências do mundo.",
-    selectFields: "id, scenario_id, title, event_type, date_label, era, year, description, causes, consequences, outcome, secrets, created_at, updated_at",
+    selectFields: "id, scenario_id, nation_id, location_id, character_id, faction_id, title, event_type, date_label, era, year, description, causes, consequences, outcome, secrets, created_at, updated_at",
+    relations: ["nation_id", "location_id", "character_id", "faction_id"],
     fields: [
       field({ key: "title", label: "Título", required: true, priority: 1 }),
       field({ key: "event_type", label: "Tipo de evento", type: "select", options: ["Guerra", "Fundação", "Ritual", "Catástrofe", "Morte", "Descoberta", "Profecia"], priority: 2 }),
@@ -138,7 +148,8 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
     createLabel: "Criar lore",
     emptyTitle: "Nenhuma entrada de lore registrada.",
     emptyText: "Crie mitos, religiões, lendas, rumores e notas profundas do cenário.",
-    selectFields: "id, scenario_id, title, category, summary, content, origin, importance, rumors, adventure_hooks, master_notes, created_at, updated_at",
+    selectFields: "id, scenario_id, event_id, character_id, location_id, faction_id, title, category, summary, content, origin, importance, rumors, adventure_hooks, master_notes, created_at, updated_at",
+    relations: ["event_id", "character_id", "location_id", "faction_id"],
     fields: [
       field({ key: "title", label: "Título", required: true, priority: 1 }),
       field({ key: "category", label: "Categoria", type: "select", options: ["Mito", "Religião", "Lenda", "Rumor", "Organização", "Artefato", "Segredo"], priority: 2 }),
@@ -166,8 +177,6 @@ export const sections: Array<{ id: ActiveSection; label: string }> = [
 
 export const fieldLabels = Object.values(sectionConfigs).reduce<Record<string, string>>((acc, config) => {
   for (const item of config.fields) acc[item.key] = item.label;
-  for (const relation of config.relations ?? []) {
-    acc[relation] = relation === "nation_id" ? "Nação vinculada" : "Local vinculado";
-  }
+  for (const relation of config.relations ?? []) acc[relation] = relationLabels[relation];
   return acc;
 }, {});
