@@ -1,4 +1,4 @@
-import { ScenarioAtlasClient } from "../atlas/scenario-atlas-client";
+import { redirect } from "next/navigation";
 
 type ScenarioSessionPageProps = {
   params: Promise<{ id: string }>;
@@ -7,5 +7,5 @@ type ScenarioSessionPageProps = {
 export default async function ScenarioSessionPage({ params }: ScenarioSessionPageProps) {
   const { id } = await params;
 
-  return <ScenarioAtlasClient scenarioId={id} />;
+  redirect(`/scenarios/${id}/atlas`);
 }
