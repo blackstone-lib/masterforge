@@ -15,7 +15,13 @@ const nations = [
 
 const quickActions = ["+ Cidade", "+ Vila", "+ Faccao", "+ Personagem", "+ Religiao", "+ Segredo"];
 
-export default function ScenarioPage({ params }: { params: { id: string } }) {
+type ScenarioPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ScenarioPage({ params }: ScenarioPageProps) {
+  const { id } = await params;
+
   return (
     <main style={{ minHeight: "100vh", background: "linear-gradient(135deg, #050505, #0f172a 58%, #111827)", color: "#f8fafc", fontFamily: "Arial, Helvetica, sans-serif" }}>
       <header style={{ height: "78px", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", borderBottom: "1px solid rgba(148,163,184,0.16)", background: "rgba(2,6,23,0.74)", backdropFilter: "blur(18px)" }}>
@@ -53,7 +59,7 @@ export default function ScenarioPage({ params }: { params: { id: string } }) {
         <section style={{ padding: "30px", overflow: "auto" }}>
           <div style={{ maxWidth: "900px" }}>
             <p style={{ color: "#f59e0b", fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", margin: 0 }}>Mesa do mestre</p>
-            <h1 style={{ fontSize: "46px", margin: "8px 0 10px", letterSpacing: "-0.05em" }}>Cenario: {params.id}</h1>
+            <h1 style={{ fontSize: "46px", margin: "8px 0 10px", letterSpacing: "-0.05em" }}>Cenario: {id}</h1>
             <p style={{ color: "#94a3b8", lineHeight: 1.65, marginBottom: "24px" }}>Edite a visao geral do mundo e expanda suas estruturas narrativas pela arvore lateral.</p>
 
             <div style={{ display: "grid", gap: "20px", border: "1px solid rgba(148,163,184,0.18)", borderRadius: "28px", padding: "24px", background: "linear-gradient(180deg, rgba(17,24,39,0.94), rgba(15,23,42,0.82))", boxShadow: "0 24px 80px rgba(0,0,0,0.3)" }}>
