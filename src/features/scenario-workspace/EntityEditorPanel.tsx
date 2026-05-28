@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { fieldLabels } from "./section-config";
-import type { EditorMode, EntityRows, EntitySection, FieldConfig, RelationKey, SectionConfig } from "./types";
+import { groupedFields, relationOptions } from "./entity-utils";
+import type { EditorMode, EntityRows, EntitySection, FieldConfig, SectionConfig } from "./types";
 
 type EntityEditorPanelProps = {
   editorMode: EditorMode;
@@ -45,14 +46,6 @@ function renderField(field: FieldConfig, value: string, onChange: (value: string
   return <input className="forge-input" type={field.inputType ?? "text"} placeholder={field.placeholder} value={value} onChange={(event) => onChange(event.target.value)} />;
 }
 
-function relationOptions(rows: EntityRows, relation: RelationKey) {
-  if (relation === "nation_id") return rows.nations.map((item) => ({ id: item.id, label: String(item.name ?? "Nação sem nome") }));
-  if (relation === "location_id") return rows.locations.map((item) => ({ id: item.id, label: String(item.name ?? "Local sem nome") }));
-  if (relation === "faction_id") return rows.factions.map((item) => ({ id: item.id, label: String(item.name ?? "Facção sem nome") }));
-  if (relation === "character_id") return rows.characters.map((item) => ({ id: item.id, label: String(item.name ?? "Personagem sem nome") }));
-  return rows.timeline_events.map((item) => ({ id: item.id, label: String(item.title ?? "Evento sem título") }));
-}
-
 export function EntityEditorPanel({
   editorMode,
   editingSection,
@@ -69,13 +62,15 @@ export function EntityEditorPanel({
   onSaveEntity,
   onClose
 }: EntityEditorPanelProps) {
+  const fieldGroups = config ? groupedFields(config.fields) : [];
+
   return (
     <aside style={{ borderLeft: "1px solid var(--forge-border)", padding: 24, background: "rgba(2,6,23,0.42)", overflow: "auto" }}>
       {!editorMode ? (
         <section className="forge-card-accent" style={{ padding: 20 }}>
           <p className="forge-kicker">Painel de edição</p>
           <h2 style={{ margin: "8px 0" }}>Selecione uma ação</h2>
-          <p className="forge-muted" style={{ lineHeight: 1.6 }}>Todos os módulos principais do cenário agora podem ser criados, editados e apagados por aqui.</p>
+          <p className="forge-muted" style={{ lineHeight: 1.6 }}>Clique em um card para ver os detalhes em modal ou use editar para abrir este drawer.</p>
         </section>
       ) : null}
 
@@ -96,20 +91,34 @@ export function EntityEditorPanel({
         <section className="forge-panel" style={{ padding: 22 }}>
           <p className="forge-kicker">{config.label}</p>
           <h2>{editorMode === "entity-create" ? config.createLabel : `Editar ${config.label.slice(0, -1).toLowerCase()}`}</h2>
-          <div style={{ display: "grid", gap: 14 }}>
-            {(config.relations ?? []).map((relation) => (
-              <FormLabel key={relation} label={fieldLabels[relation]}>
-                <select className="forge-input" value={formData[relation] ?? ""} onChange={(event) => onFieldChange(relation, event.target.value)}>
-                  <option value="">Nenhum</option>
-                  {relationOptions(rows, relation).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-                </select>
-              </FormLabel>
-            ))}
+          <div style={{ display: "grid", gap: 18 }}>
+            {(config.relations ?? []).length > 0 ? (
+              <section className="forge-card" style={{ padding: 16 }}>
+                <p className="forge-kicker">Vínculos</p>
+                <div style={{ display: "grid", gap: 14, marginTop: 14 }}>
+                  {(config.relations ?? []).map((relation) => (
+                    <FormLabel key={relation} label={fieldLabels[relation]}>
+                      <select className="forge-input" value={formData[relation] ?? ""} onChange={(event) => onFieldChange(relation, event.target.value)}>
+                        <option value="">Nenhum</option>
+                        {relationOptions(rows, relation).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                      </select>
+                    </FormLabel>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
-            {config.fields.map((field) => (
-              <FormLabel key={field.key} label={`${field.label}${field.required ? " *" : ""}`}>
-                {renderField(field, formData[field.key] ?? "", (value) => onFieldChange(field.key, value))}
-              </FormLabel>
+            {fieldGroups.map((group) => (
+              <section key={group.title} className="forge-card" style={{ padding: 16 }}>
+                <p className="forge-kicker">{group.title}</p>
+                <div style={{ display: "grid", gap: 14, marginTop: 14 }}>
+                  {group.fields.map((field) => (
+                    <FormLabel key={field.key} label={`${field.label}${field.required ? " *" : ""}`}>
+                      {renderField(field, formData[field.key] ?? "", (value) => onFieldChange(field.key, value))}
+                    </FormLabel>
+                  ))}
+                </div>
+              </section>
             ))}
 
             <button className="forge-button-primary" onClick={onSaveEntity} disabled={saving}>{saving ? "Gravando..." : "Gravar"}</button>
