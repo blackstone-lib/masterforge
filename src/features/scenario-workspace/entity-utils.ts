@@ -1,5 +1,19 @@
 import { relationLabels } from "./section-config";
-import type { EntityRecord, EntityRows, FieldConfig, RelationKey, SectionConfig } from "./types";
+import type { EntityRecord, EntityRows, EntitySection, FieldConfig, RelationKey, SectionConfig } from "./types";
+
+const singularLabels: Record<EntitySection, string> = {
+  nations: "Nação",
+  settlements: "Assentamento",
+  locations: "Local",
+  factions: "Facção",
+  characters: "Personagem",
+  timeline_events: "Evento",
+  lore_entries: "Entrada de lore"
+};
+
+export function singularLabelOf(section: EntitySection) {
+  return singularLabels[section];
+}
 
 export function valueText(value: unknown) {
   if (value === null || value === undefined || value === "") return "Não definido";
