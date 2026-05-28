@@ -7,7 +7,7 @@ import { EntityEditorPanel } from "./EntityEditorPanel";
 import { EntityList } from "./EntityList";
 import { ScenarioOverview } from "./ScenarioOverview";
 import { ScenarioSidebar } from "./ScenarioSidebar";
-import { buildInitialData, buildPayloadFromForm, singularLabelOf, titleOf } from "./entity-utils";
+import { buildInitialData, buildPayloadFromForm, singularLabelOf, titleOf, valueText } from "./entity-utils";
 import { fieldLabels, sectionConfigs } from "./section-config";
 import {
   createEntity,
@@ -21,6 +21,12 @@ import {
 } from "./scenario-service";
 import type { ActiveSection, EditorMode, EntityRecord, EntityRows, EntitySection, Scenario } from "./types";
 
+function matchesSearch(item: EntityRecord, search: string) {
+  if (!search.trim()) return true;
+  const normalized = search.trim().toLowerCase();
+  return Object.values(item).some((value) => valueText(value).toLowerCase().includes(normalized));
+}
+
 export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
   const router = useRouter();
   const [scenario, setScenario] = useState<Scenario | null>(null);
@@ -32,6 +38,7 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [scenarioName, setScenarioName] = useState("");
   const [scenarioDescription, setScenarioDescription] = useState("");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -217,22 +224,47 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
   }
 
   const editingConfig = editingSection ? sectionConfigs[editingSection] : null;
+  const searchResults = (Object.keys(sectionConfigs) as EntitySection[]).flatMap((section) =>
+    rows[section]
+      .filter((item) => matchesSearch(item, search))
+      .map((item) => ({ section, item }))
+  );
 
   return (
     <main className="forge-page" style={{ display: "grid", gridTemplateColumns: "292px minmax(620px, 1fr) 420px", minHeight: "100vh" }}>
       <ScenarioSidebar scenario={scenario} rows={rows} activeSection={activeSection} onChangeSection={changeSection} />
 
       <section style={{ padding: 34, overflow: "auto" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 18 }}>
+          <input
+            className="forge-input"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar neste cenário..."
+            style={{ maxWidth: 520 }}
+          />
+          {search.trim() ? (
+            <button className="forge-button-ghost" onClick={() => setSearch("")}>Limpar</button>
+          ) : null}
+        </div>
+
+        {search.trim() ? (
+          <p className="forge-muted" style={{ marginTop: -4, marginBottom: 18 }}>
+            {searchResults.length} resultado{searchResults.length === 1 ? "" : "s"} encontrado{searchResults.length === 1 ? "" : "s"} no cenário.
+          </p>
+        ) : null}
+
         {message ? <p style={{ color: message.includes("Forja") ? "var(--forge-success)" : "var(--forge-danger)", lineHeight: 1.5 }}>{message}</p> : null}
 
         {activeSection === "overview" ? (
-          <ScenarioOverview scenario={scenario} rows={rows} onEditScenario={openScenarioEditor} onCreateEntity={openCreate} />
+          <ScenarioOverview scenario={scenario} rows={rows} search={search} searchResults={searchResults} onChangeSection={changeSection} onEditScenario={openScenarioEditor} onCreateEntity={openCreate} />
         ) : (
           <EntityList
             section={activeSection}
             config={sectionConfigs[activeSection]}
             rows={rows}
             saving={saving}
+            search={search}
             onCreate={openCreate}
             onEdit={openEdit}
             onDelete={deleteEntity}
