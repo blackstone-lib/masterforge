@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { relationLabels } from "./section-config";
 import type { EntityRecord, EntityRows, EntitySection, RelationKey, SectionConfig } from "./types";
 
 type EntityListProps = {
@@ -27,11 +28,26 @@ function relationName(rows: EntityRows, relation: RelationKey, value: unknown) {
 
   if (relation === "nation_id") {
     const nation = rows.nations.find((item) => item.id === value);
-    return nation ? String(nation.name ?? "Nação vinculada") : "Nação vinculada";
+    return nation ? String(nation.name ?? relationLabels[relation]) : relationLabels[relation];
   }
 
-  const location = rows.locations.find((item) => item.id === value);
-  return location ? String(location.name ?? "Local vinculado") : "Local vinculado";
+  if (relation === "location_id") {
+    const location = rows.locations.find((item) => item.id === value);
+    return location ? String(location.name ?? relationLabels[relation]) : relationLabels[relation];
+  }
+
+  if (relation === "faction_id") {
+    const faction = rows.factions.find((item) => item.id === value);
+    return faction ? String(faction.name ?? relationLabels[relation]) : relationLabels[relation];
+  }
+
+  if (relation === "character_id") {
+    const character = rows.characters.find((item) => item.id === value);
+    return character ? String(character.name ?? relationLabels[relation]) : relationLabels[relation];
+  }
+
+  const event = rows.timeline_events.find((item) => item.id === value);
+  return event ? String(event.title ?? relationLabels[relation]) : relationLabels[relation];
 }
 
 function FieldCard({ label, value }: { label: string; value: unknown }) {
@@ -136,6 +152,18 @@ export function EntityList({ section, config, rows, saving, onCreate, onEdit, on
 
                 {section === "locations" ? (
                   <button className="forge-button-ghost" onClick={() => onCreate("factions", { nation_id: String(item.nation_id ?? ""), location_id: item.id })}>Nova facção</button>
+                ) : null}
+
+                {section === "factions" ? (
+                  <button className="forge-button-ghost" onClick={() => onCreate("characters", { nation_id: String(item.nation_id ?? ""), location_id: String(item.location_id ?? ""), faction_id: item.id })}>Novo personagem</button>
+                ) : null}
+
+                {section === "characters" ? (
+                  <button className="forge-button-ghost" onClick={() => onCreate("timeline_events", { nation_id: String(item.nation_id ?? ""), location_id: String(item.location_id ?? ""), character_id: item.id, faction_id: String(item.faction_id ?? "") })}>Novo evento</button>
+                ) : null}
+
+                {section === "timeline_events" ? (
+                  <button className="forge-button-ghost" onClick={() => onCreate("lore_entries", { event_id: item.id, character_id: String(item.character_id ?? ""), location_id: String(item.location_id ?? ""), faction_id: String(item.faction_id ?? "") })}>Nova lore</button>
                 ) : null}
 
                 <DangerButton onClick={() => onDelete(section, item)} disabled={saving}>Apagar</DangerButton>
