@@ -64,31 +64,27 @@ type Faction = {
   updated_at: string;
 };
 
-type GenericRecord = Record<string, unknown> & { id: string; name?: string | null; title?: string | null; type?: string | null; category?: string | null; event_type?: string | null };
+type GenericRecord = Record<string, unknown> & {
+  id: string;
+  name?: string | null;
+  title?: string | null;
+  type?: string | null;
+  category?: string | null;
+  event_type?: string | null;
+};
 
-type ActiveSection =
-  | "overview"
-  | "nations"
-  | "settlements"
-  | "locations"
-  | "factions"
-  | "characters"
-  | "timeline_events"
-  | "lore_entries"
-  | "secrets";
-
+type ActiveSection = "overview" | "nations" | "settlements" | "locations" | "factions" | "characters" | "timeline_events" | "lore_entries";
 type EditorMode = "scenario" | "nation-create" | "nation-edit" | "location-create" | "location-edit" | "faction-create" | "faction-edit" | null;
 
-const sections: Array<{ id: ActiveSection; label: string; editable: boolean }> = [
-  { id: "overview", label: "Visão geral", editable: false },
-  { id: "nations", label: "Nações", editable: true },
-  { id: "settlements", label: "Assentamentos", editable: false },
-  { id: "locations", label: "Locais", editable: true },
-  { id: "factions", label: "Facções", editable: true },
-  { id: "characters", label: "Personagens", editable: false },
-  { id: "timeline_events", label: "Linha do tempo", editable: false },
-  { id: "lore_entries", label: "Lore", editable: false },
-  { id: "secrets", label: "Segredos", editable: false }
+const sections: Array<{ id: ActiveSection; label: string }> = [
+  { id: "overview", label: "Visão geral" },
+  { id: "nations", label: "Nações" },
+  { id: "settlements", label: "Assentamentos" },
+  { id: "locations", label: "Locais" },
+  { id: "factions", label: "Facções" },
+  { id: "characters", label: "Personagens" },
+  { id: "timeline_events", label: "Linha do tempo" },
+  { id: "lore_entries", label: "Lore" }
 ];
 
 const nationSelect = "id, scenario_id, name, description, government_type, capital, culture, religion, current_conflicts, master_secret, created_at, updated_at";
@@ -122,12 +118,21 @@ const labels: Record<string, string> = {
   related_entities: "Entidades relacionadas",
   adventure_hooks: "Ganchos de aventura",
   master_notes: "Notas do mestre",
-  master_secret: "Segredo do mestre"
+  master_secret: "Segredo do mestre",
+  race: "Raça",
+  class_role: "Função",
+  personality: "Personalidade",
+  background: "Histórico",
+  goals: "Objetivos",
+  secrets: "Segredos"
 };
 
-function readableLabel(key: string) {
-  return labels[key] ?? key.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
-}
+const visibleFieldsBySection: Record<Exclude<ActiveSection, "overview" | "nations" | "locations" | "factions">, string[]> = {
+  settlements: ["name", "type", "description", "population", "government", "economy", "notable_places", "current_situation", "importance", "master_secret"],
+  characters: ["name", "title", "type", "race", "class_role", "description", "personality", "background", "goals", "secrets"],
+  timeline_events: ["title", "event_type", "date_label", "era", "year", "description", "causes", "consequences", "outcome", "secrets"],
+  lore_entries: ["title", "category", "summary", "content", "origin", "importance", "rumors", "adventure_hooks", "master_notes"]
+};
 
 function readableValue(value: unknown) {
   if (value === null || value === undefined || value === "") return "Não definido";
@@ -199,7 +204,19 @@ function DangerButton({ children, onClick, disabled }: { children: React.ReactNo
   );
 }
 
-function GenericSection({ title, rows, emptyTitle, emptyText }: { title: string; rows: GenericRecord[]; emptyTitle: string; emptyText: string }) {
+function GenericSection({
+  title,
+  rows,
+  fields,
+  emptyTitle,
+  emptyText
+}: {
+  title: string;
+  rows: GenericRecord[];
+  fields: string[];
+  emptyTitle: string;
+  emptyText: string;
+}) {
   if (rows.length === 0) {
     return (
       <section className="forge-card-accent" style={{ borderStyle: "dashed", padding: "30px" }}>
@@ -217,7 +234,7 @@ function GenericSection({ title, rows, emptyTitle, emptyText }: { title: string;
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" }}>
         {rows.map((item) => {
-          const fields = Object.entries(item).filter(([key]) => !["id", "scenario_id", "created_at", "updated_at"].includes(key));
+          const visibleFields = fields.filter((field) => item[field] !== null && item[field] !== undefined && item[field] !== "");
           return (
             <article key={item.id} className="forge-panel" style={{ padding: "22px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: "14px", alignItems: "flex-start" }}>
@@ -227,14 +244,18 @@ function GenericSection({ title, rows, emptyTitle, emptyText }: { title: string;
                 </div>
                 {(item.type || item.category || item.event_type) ? <span className="forge-status-pill">{String(item.type || item.category || item.event_type)}</span> : null}
               </div>
-              <div style={{ display: "grid", gap: "10px" }}>
-                {fields.slice(0, 8).map(([key, value]) => (
-                  <div key={key} className="forge-card" style={{ padding: "14px" }}>
-                    <p className="forge-muted" style={{ margin: 0, fontSize: "13px" }}>{readableLabel(key)}</p>
-                    <p className="forge-muted-strong" style={{ margin: "8px 0 0", lineHeight: 1.55 }}>{readableValue(value)}</p>
-                  </div>
-                ))}
-              </div>
+              {visibleFields.length === 0 ? (
+                <p className="forge-muted">Este registro ainda não possui campos narrativos preenchidos.</p>
+              ) : (
+                <div style={{ display: "grid", gap: "10px" }}>
+                  {visibleFields.map((field) => (
+                    <div key={field} className="forge-card" style={{ padding: "14px" }}>
+                      <p className="forge-muted" style={{ margin: 0, fontSize: "13px" }}>{labels[field] ?? field}</p>
+                      <p className="forge-muted-strong" style={{ margin: "8px 0 0", lineHeight: 1.55 }}>{readableValue(item[field])}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </article>
           );
         })}
@@ -770,381 +791,3 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
     setMessage("Facção registrada na Forja.");
   }
 
-  async function handleUpdateFaction() {
-    if (!scenario || !editingFactionId) return;
-    if (!factionName.trim()) {
-      setMessage("Digite um nome para a facção.");
-      return;
-    }
-
-    setSaving(true);
-    setMessage("");
-
-    const { data, error } = await supabase
-      .from("factions")
-      .update({
-        nation_id: factionNationId || null,
-        location_id: factionLocationId || null,
-        name: factionName.trim(),
-        type: factionType.trim(),
-        description: factionDescription.trim(),
-        goal: factionGoal.trim(),
-        leader: factionLeader.trim(),
-        allies: factionAllies.trim(),
-        enemies: factionEnemies.trim(),
-        influence_level: factionInfluenceLevel.trim(),
-        current_status: factionCurrentStatus.trim(),
-        master_secret: factionMasterSecret.trim(),
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", editingFactionId)
-      .eq("scenario_id", scenario.id)
-      .select(factionSelect)
-      .single();
-
-    setSaving(false);
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setFactions((current) => current.map((item) => (item.id === data.id ? data : item)));
-    closeEditor();
-    setMessage("Facção atualizada na Forja.");
-  }
-
-  async function handleDeleteFaction(faction: Faction) {
-    if (!scenario) return;
-    if (!window.confirm(`Apagar "${faction.name}"? Esta ação não pode ser desfeita.`)) return;
-
-    setSaving(true);
-    setMessage("");
-
-    const { error } = await supabase.from("factions").delete().eq("id", faction.id).eq("scenario_id", scenario.id);
-
-    setSaving(false);
-
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-
-    setFactions((current) => current.filter((item) => item.id !== faction.id));
-    if (editingFactionId === faction.id) closeEditor();
-    setMessage("Facção apagada da Forja.");
-  }
-
-  if (loading) {
-    return (
-      <main className="forge-page" style={{ display: "grid", placeItems: "center" }}>
-        <section className="forge-card-accent" style={{ padding: "30px" }}>
-          <p className="forge-kicker">Master Forge</p>
-          <h1>Abrindo cenário...</h1>
-        </section>
-      </main>
-    );
-  }
-
-  if (!scenario) {
-    return (
-      <main className="forge-page" style={{ display: "grid", placeItems: "center" }}>
-        <section className="forge-card-accent" style={{ padding: "30px" }}>
-          <h1>Cenário não encontrado</h1>
-          <p className="forge-muted">{message}</p>
-          <Link href="/dashboard" className="forge-link-primary">Voltar ao dashboard</Link>
-        </section>
-      </main>
-    );
-  }
-
-  const stats = [
-    ["Nações", nations.length],
-    ["Assentamentos", settlements.length],
-    ["Locais", locations.length],
-    ["Facções", factions.length],
-    ["Personagens", characters.length],
-    ["Eventos", timelineEvents.length],
-    ["Lore", loreEntries.length]
-  ];
-
-  return (
-    <main className="forge-page" style={{ display: "grid", gridTemplateColumns: "292px minmax(620px, 1fr) 420px", minHeight: "100vh" }}>
-      <aside style={{ borderRight: "1px solid var(--forge-border)", padding: "24px", background: "rgba(2,6,23,0.58)" }}>
-        <Link href="/dashboard" style={{ color: "inherit", textDecoration: "none", display: "flex", gap: "12px", alignItems: "center", marginBottom: "28px" }}>
-          <span className="forge-mark">MF</span>
-          <strong style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>Master Forge</strong>
-        </Link>
-
-        <div className="forge-card-accent" style={{ padding: "18px", marginBottom: "18px" }}>
-          <p className="forge-kicker">Cenário ativo</p>
-          <strong style={{ display: "block", fontSize: "20px", marginTop: "8px" }}>{scenario.name}</strong>
-        </div>
-
-        <nav style={{ display: "grid", gap: "10px" }}>
-          {sections.map((section) => {
-            const count = sectionCount(section.id);
-            return (
-              <button
-                key={section.id}
-                className={activeSection === section.id ? "forge-nav-item-active" : "forge-nav-item"}
-                onClick={() => changeSection(section.id)}
-                style={{ display: "flex", justifyContent: "space-between", color: "inherit", cursor: "pointer", textAlign: "left" }}
-              >
-                <span>{section.label}</span>
-                {count !== null ? <small>{count}</small> : null}
-              </button>
-            );
-          })}
-        </nav>
-
-        <Link href={`/scenarios/${scenario.id}/atlas`} className="forge-link-pill" style={{ marginTop: "22px", textAlign: "center" }}>Abrir modo Atlas</Link>
-      </aside>
-
-      <section style={{ padding: "34px", overflow: "auto" }}>
-        <header style={{ display: "flex", justifyContent: "space-between", gap: "18px", alignItems: "flex-start", marginBottom: "26px" }}>
-          <div>
-            <p className="forge-kicker">Mesa do Mestre</p>
-            <h1 style={{ fontSize: "52px", lineHeight: 0.96, margin: "10px 0", letterSpacing: "-0.05em" }}>{scenario.name}</h1>
-            <p className="forge-muted" style={{ lineHeight: 1.65, maxWidth: "720px" }}>{scenario.description || "Sem crônica inicial ainda."}</p>
-          </div>
-          <button className="forge-button-ghost" onClick={openScenarioEditor}>Editar cenário</button>
-        </header>
-
-        {message ? <p style={{ color: message.includes("Forja") ? "var(--forge-success)" : "var(--forge-danger)", lineHeight: 1.5 }}>{message}</p> : null}
-
-        {activeSection === "overview" ? (
-          <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px", marginBottom: "24px" }}>
-              {stats.map(([label, value]) => (
-                <div key={label} className="forge-card" style={{ padding: "18px" }}>
-                  <p className="forge-muted" style={{ margin: 0 }}>{label}</p>
-                  <strong style={{ display: "block", fontSize: "32px", marginTop: "6px" }}>{value}</strong>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
-              <button className="forge-card-accent" onClick={openCreateNationEditor} style={{ padding: "22px", color: "inherit", cursor: "pointer", textAlign: "left" }}>
-                <p className="forge-kicker">Política</p>
-                <h2>Fundar nação</h2>
-                <p className="forge-muted">Crie reinos, impérios, tribos e domínios.</p>
-              </button>
-              <button className="forge-card-accent" onClick={() => openCreateLocationEditor()} style={{ padding: "22px", color: "inherit", cursor: "pointer", textAlign: "left" }}>
-                <p className="forge-kicker">Território</p>
-                <h2>Registrar local</h2>
-                <p className="forge-muted">Adicione cidades, vilas, ruínas e pontos de interesse.</p>
-              </button>
-              <button className="forge-card-accent" onClick={() => openCreateFactionEditor()} style={{ padding: "22px", color: "inherit", cursor: "pointer", textAlign: "left" }}>
-                <p className="forge-kicker">Conflito</p>
-                <h2>Criar facção</h2>
-                <p className="forge-muted">Organize cultos, guildas, casas nobres e ordens.</p>
-              </button>
-            </div>
-          </>
-        ) : null}
-
-        {activeSection === "nations" ? (
-          <section>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-              <h2 style={{ margin: 0 }}>Nações</h2>
-              <button className="forge-button-primary" onClick={openCreateNationEditor}>+ Fundar nação</button>
-            </div>
-            {nations.length === 0 ? (
-              <EmptyState title="Nenhuma bandeira foi erguida." text="Crie a primeira nação deste cenário para começar a organizar política, cultura e conflitos." actionLabel="Fundar primeira nação" onAction={openCreateNationEditor} />
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" }}>
-                {nations.map((nation) => (
-                  <article key={nation.id} className="forge-panel" style={{ padding: "22px" }}>
-                    <p className="forge-kicker">Nação</p>
-                    <h2 style={{ margin: "6px 0 12px" }}>{nation.name}</h2>
-                    <TextBlock label="Descrição" value={nation.description} />
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "10px" }}>
-                      <FieldView label="Governo" value={nation.government_type} />
-                      <FieldView label="Capital" value={nation.capital} />
-                    </div>
-                    <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
-                      <button className="forge-button-ghost" onClick={() => openEditNationEditor(nation)}>Editar</button>
-                      <button className="forge-button-ghost" onClick={() => openCreateLocationEditor(nation.id)}>Novo local</button>
-                      <button className="forge-button-ghost" onClick={() => openCreateFactionEditor(nation.id)}>Nova facção</button>
-                      <DangerButton onClick={() => handleDeleteNation(nation)} disabled={saving}>Apagar</DangerButton>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-        ) : null}
-
-        {activeSection === "settlements" ? <GenericSection title="Assentamentos" rows={settlements} emptyTitle="Nenhum assentamento registrado." emptyText="Quando cidades, vilas ou capitais forem registradas nesta tabela, elas aparecerão aqui na tela principal." /> : null}
-
-        {activeSection === "locations" ? (
-          <section>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-              <h2 style={{ margin: 0 }}>Locais</h2>
-              <button className="forge-button-primary" onClick={() => openCreateLocationEditor()}>+ Registrar local</button>
-            </div>
-            {locations.length === 0 ? (
-              <EmptyState title="O mapa ainda está em branco." text="Registre cidades, vilas, fortalezas, templos e ruínas para dar forma ao cenário." actionLabel="Registrar primeiro local" onAction={() => openCreateLocationEditor()} />
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" }}>
-                {locations.map((location) => (
-                  <article key={location.id} className="forge-panel" style={{ padding: "22px" }}>
-                    <p className="forge-kicker">Local</p>
-                    <h2 style={{ margin: "6px 0 12px" }}>{location.name}</h2>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
-                      {location.type ? <span className="forge-chip">{location.type}</span> : null}
-                      {location.nation_id ? <span className="forge-chip">{nationsById.get(location.nation_id)?.name ?? "Nação vinculada"}</span> : null}
-                    </div>
-                    <TextBlock label="Descrição" value={location.description} />
-                    <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
-                      <button className="forge-button-ghost" onClick={() => openEditLocationEditor(location)}>Editar</button>
-                      <button className="forge-button-ghost" onClick={() => openCreateFactionEditor(location.nation_id ?? "", location.id)}>Nova facção</button>
-                      <DangerButton onClick={() => handleDeleteLocation(location)} disabled={saving}>Apagar</DangerButton>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-        ) : null}
-
-        {activeSection === "factions" ? (
-          <section>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-              <h2 style={{ margin: 0 }}>Facções</h2>
-              <button className="forge-button-primary" onClick={() => openCreateFactionEditor()}>+ Criar facção</button>
-            </div>
-            {factions.length === 0 ? (
-              <EmptyState title="Nenhuma sombra se move ainda." text="Crie guildas, cultos, ordens e casas nobres para gerar alianças e conflitos." actionLabel="Criar primeira facção" onAction={() => openCreateFactionEditor()} />
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" }}>
-                {factions.map((faction) => (
-                  <article key={faction.id} className="forge-panel" style={{ padding: "22px" }}>
-                    <p className="forge-kicker">Facção</p>
-                    <h2 style={{ margin: "6px 0 12px" }}>{faction.name}</h2>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
-                      {faction.type ? <span className="forge-chip">{faction.type}</span> : null}
-                      {faction.influence_level ? <span className="forge-chip">{faction.influence_level}</span> : null}
-                      {faction.nation_id ? <span className="forge-chip">{nationsById.get(faction.nation_id)?.name ?? "Nação vinculada"}</span> : null}
-                      {faction.location_id ? <span className="forge-chip">{locationsById.get(faction.location_id)?.name ?? "Local vinculado"}</span> : null}
-                    </div>
-                    <TextBlock label="Objetivo" value={faction.goal} />
-                    <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
-                      <button className="forge-button-ghost" onClick={() => openEditFactionEditor(faction)}>Editar</button>
-                      <DangerButton onClick={() => handleDeleteFaction(faction)} disabled={saving}>Apagar</DangerButton>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-        ) : null}
-
-        {activeSection === "characters" ? <GenericSection title="Personagens" rows={characters} emptyTitle="Nenhum personagem registrado." emptyText="Quando NPCs, aliados e antagonistas forem registrados, eles aparecerão aqui na tela principal." /> : null}
-        {activeSection === "timeline_events" ? <GenericSection title="Linha do tempo" rows={timelineEvents} emptyTitle="Nenhum evento histórico registrado." emptyText="Eventos, eras e consequências do cenário aparecerão aqui." /> : null}
-        {activeSection === "lore_entries" ? <GenericSection title="Lore" rows={loreEntries} emptyTitle="Nenhuma entrada de lore registrada." emptyText="Mitos, religiões, rumores e notas de mundo aparecerão aqui." /> : null}
-        {activeSection === "secrets" ? <GenericSection title="Segredos" rows={loreEntries.filter((entry) => entry.master_secret || entry.master_notes || entry.secrets)} emptyTitle="O grimório de segredos ainda está selado." emptyText="Segredos e notas privadas podem ser centralizados aqui conforme os módulos avançados evoluírem." /> : null}
-      </section>
-
-      <aside style={{ borderLeft: "1px solid var(--forge-border)", padding: "24px", background: "rgba(2,6,23,0.42)", overflow: "auto" }}>
-        {!editorMode ? (
-          <section className="forge-card-accent" style={{ padding: "20px" }}>
-            <p className="forge-kicker">Painel de edição</p>
-            <h2 style={{ margin: "8px 0" }}>Selecione uma ação</h2>
-            <p className="forge-muted" style={{ lineHeight: 1.6 }}>Nações, Locais e Facções já podem ser criados e editados aqui. Os demais módulos agora aparecem nesta tela e serão os próximos a receber edição completa.</p>
-          </section>
-        ) : null}
-
-        {editorMode === "scenario" ? (
-          <section className="forge-panel" style={{ padding: "22px" }}>
-            <p className="forge-kicker">Cenário</p>
-            <h2>Editar cenário</h2>
-            <div style={{ display: "grid", gap: "14px" }}>
-              <FormLabel label="Nome do cenário"><input className="forge-input" value={name} onChange={(event) => setName(event.target.value)} /></FormLabel>
-              <FormLabel label="Crônica inicial"><textarea className="forge-textarea" value={description} onChange={(event) => setDescription(event.target.value)} style={{ minHeight: "140px" }} /></FormLabel>
-              <button className="forge-button-primary" onClick={handleSaveScenario} disabled={saving}>{saving ? "Gravando..." : "Gravar cenário"}</button>
-              <button className="forge-button-ghost" onClick={closeEditor}>Cancelar</button>
-            </div>
-          </section>
-        ) : null}
-
-        {(editorMode === "nation-create" || editorMode === "nation-edit") ? (
-          <section className="forge-panel" style={{ padding: "22px" }}>
-            <p className="forge-kicker">Nação</p>
-            <h2>{editorMode === "nation-create" ? "Fundar nação" : "Editar nação"}</h2>
-            <div style={{ display: "grid", gap: "14px" }}>
-              <FormLabel label="Nome"><input className="forge-input" value={nationName} onChange={(event) => setNationName(event.target.value)} /></FormLabel>
-              <FormLabel label="Descrição"><textarea className="forge-textarea" value={nationDescription} onChange={(event) => setNationDescription(event.target.value)} /></FormLabel>
-              <FormLabel label="Tipo de governo"><input className="forge-input" value={nationGovernmentType} onChange={(event) => setNationGovernmentType(event.target.value)} /></FormLabel>
-              <FormLabel label="Capital"><input className="forge-input" value={nationCapital} onChange={(event) => setNationCapital(event.target.value)} /></FormLabel>
-              <FormLabel label="Cultura"><textarea className="forge-textarea" value={nationCulture} onChange={(event) => setNationCulture(event.target.value)} /></FormLabel>
-              <FormLabel label="Religião"><input className="forge-input" value={nationReligion} onChange={(event) => setNationReligion(event.target.value)} /></FormLabel>
-              <FormLabel label="Conflitos atuais"><textarea className="forge-textarea" value={nationCurrentConflicts} onChange={(event) => setNationCurrentConflicts(event.target.value)} /></FormLabel>
-              <FormLabel label="Segredo do mestre"><textarea className="forge-textarea" value={nationMasterSecret} onChange={(event) => setNationMasterSecret(event.target.value)} /></FormLabel>
-              <button className="forge-button-primary" onClick={editorMode === "nation-create" ? handleCreateNation : handleUpdateNation} disabled={saving}>{saving ? "Gravando..." : "Gravar nação"}</button>
-              <button className="forge-button-ghost" onClick={closeEditor}>Cancelar</button>
-            </div>
-          </section>
-        ) : null}
-
-        {(editorMode === "location-create" || editorMode === "location-edit") ? (
-          <section className="forge-panel" style={{ padding: "22px" }}>
-            <p className="forge-kicker">Local</p>
-            <h2>{editorMode === "location-create" ? "Registrar local" : "Editar local"}</h2>
-            <div style={{ display: "grid", gap: "14px" }}>
-              <FormLabel label="Nome"><input className="forge-input" value={locationName} onChange={(event) => setLocationName(event.target.value)} /></FormLabel>
-              <FormLabel label="Tipo"><input className="forge-input" value={locationType} onChange={(event) => setLocationType(event.target.value)} placeholder="Cidade, vila, ruína, templo..." /></FormLabel>
-              <FormLabel label="Nação vinculada">
-                <select className="forge-input" value={locationNationId} onChange={(event) => setLocationNationId(event.target.value)}>
-                  <option value="">Nenhuma</option>
-                  {nations.map((nation) => <option key={nation.id} value={nation.id}>{nation.name}</option>)}
-                </select>
-              </FormLabel>
-              <FormLabel label="Descrição"><textarea className="forge-textarea" value={locationDescription} onChange={(event) => setLocationDescription(event.target.value)} /></FormLabel>
-              <FormLabel label="População"><input className="forge-input" value={locationPopulation} onChange={(event) => setLocationPopulation(event.target.value)} /></FormLabel>
-              <FormLabel label="Governante"><input className="forge-input" value={locationRuler} onChange={(event) => setLocationRuler(event.target.value)} /></FormLabel>
-              <FormLabel label="Importância"><textarea className="forge-textarea" value={locationImportance} onChange={(event) => setLocationImportance(event.target.value)} /></FormLabel>
-              <FormLabel label="Situação atual"><textarea className="forge-textarea" value={locationCurrentSituation} onChange={(event) => setLocationCurrentSituation(event.target.value)} /></FormLabel>
-              <FormLabel label="Segredo do mestre"><textarea className="forge-textarea" value={locationMasterSecret} onChange={(event) => setLocationMasterSecret(event.target.value)} /></FormLabel>
-              <button className="forge-button-primary" onClick={editorMode === "location-create" ? handleCreateLocation : handleUpdateLocation} disabled={saving}>{saving ? "Gravando..." : "Gravar local"}</button>
-              <button className="forge-button-ghost" onClick={closeEditor}>Cancelar</button>
-            </div>
-          </section>
-        ) : null}
-
-        {(editorMode === "faction-create" || editorMode === "faction-edit") ? (
-          <section className="forge-panel" style={{ padding: "22px" }}>
-            <p className="forge-kicker">Facção</p>
-            <h2>{editorMode === "faction-create" ? "Criar facção" : "Editar facção"}</h2>
-            <div style={{ display: "grid", gap: "14px" }}>
-              <FormLabel label="Nome"><input className="forge-input" value={factionName} onChange={(event) => setFactionName(event.target.value)} /></FormLabel>
-              <FormLabel label="Tipo"><input className="forge-input" value={factionType} onChange={(event) => setFactionType(event.target.value)} placeholder="Guilda, culto, ordem, casa nobre..." /></FormLabel>
-              <FormLabel label="Nação vinculada">
-                <select className="forge-input" value={factionNationId} onChange={(event) => setFactionNationId(event.target.value)}>
-                  <option value="">Nenhuma</option>
-                  {nations.map((nation) => <option key={nation.id} value={nation.id}>{nation.name}</option>)}
-                </select>
-              </FormLabel>
-              <FormLabel label="Local vinculado">
-                <select className="forge-input" value={factionLocationId} onChange={(event) => setFactionLocationId(event.target.value)}>
-                  <option value="">Nenhum</option>
-                  {locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
-                </select>
-              </FormLabel>
-              <FormLabel label="Descrição"><textarea className="forge-textarea" value={factionDescription} onChange={(event) => setFactionDescription(event.target.value)} /></FormLabel>
-              <FormLabel label="Objetivo"><textarea className="forge-textarea" value={factionGoal} onChange={(event) => setFactionGoal(event.target.value)} /></FormLabel>
-              <FormLabel label="Líder"><input className="forge-input" value={factionLeader} onChange={(event) => setFactionLeader(event.target.value)} /></FormLabel>
-              <FormLabel label="Aliados"><textarea className="forge-textarea" value={factionAllies} onChange={(event) => setFactionAllies(event.target.value)} /></FormLabel>
-              <FormLabel label="Inimigos"><textarea className="forge-textarea" value={factionEnemies} onChange={(event) => setFactionEnemies(event.target.value)} /></FormLabel>
-              <FormLabel label="Nível de influência"><input className="forge-input" value={factionInfluenceLevel} onChange={(event) => setFactionInfluenceLevel(event.target.value)} /></FormLabel>
-              <FormLabel label="Status atual"><input className="forge-input" value={factionCurrentStatus} onChange={(event) => setFactionCurrentStatus(event.target.value)} /></FormLabel>
-              <FormLabel label="Segredo do mestre"><textarea className="forge-textarea" value={factionMasterSecret} onChange={(event) => setFactionMasterSecret(event.target.value)} /></FormLabel>
-              <button className="forge-button-primary" onClick={editorMode === "faction-create" ? handleCreateFaction : handleUpdateFaction} disabled={saving}>{saving ? "Gravando..." : "Gravar facção"}</button>
-              <button className="forge-button-ghost" onClick={closeEditor}>Cancelar</button>
-            </div>
-          </section>
-        ) : null}
-      </aside>
-    </main>
-  );
-}
