@@ -60,7 +60,7 @@ export function DashboardClient() {
     if (!user) return;
 
     if (!newScenarioName.trim()) {
-      setMessage("Digite um nome para o cenario.");
+      setMessage("Digite um nome para o cenário.");
       return;
     }
 
@@ -89,7 +89,7 @@ export function DashboardClient() {
     setNewScenarioName("");
     setNewScenarioDescription("");
     setShowForm(false);
-    setMessage("Cenario criado com sucesso.");
+    setMessage("Registro gravado na Forja.");
   }
 
   async function handleSignOut() {
@@ -99,10 +99,10 @@ export function DashboardClient() {
   }
 
   const stats = [
-    ["Cenarios", String(scenarios.length)],
-    ["Nacoes", "0"],
+    ["Mundos", String(scenarios.length)],
+    ["Nações", "0"],
     ["Locais", "0"],
-    ["Faccoes", "0"]
+    ["Facções", "0"]
   ];
 
   if (loading) {
@@ -120,13 +120,13 @@ export function DashboardClient() {
     <main className="forge-page" style={{ display: "grid", gridTemplateColumns: "292px 1fr" }}>
       <aside style={{ borderRight: "1px solid var(--forge-border)", padding: "26px", background: "rgba(2,6,23,0.68)" }}>
         <Link href="/" style={{ color: "inherit", textDecoration: "none", display: "flex", gap: "12px", alignItems: "center", marginBottom: "34px" }}>
-          <span style={{ width: "42px", height: "42px", borderRadius: "14px", display: "grid", placeItems: "center", background: "linear-gradient(135deg, var(--forge-gold), #7f1d1d)", color: "#111827", fontWeight: 950 }}>MF</span>
+          <span className="forge-mark">MF</span>
           <strong style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>Master Forge</strong>
         </Link>
 
         <nav style={{ display: "grid", gap: "10px" }}>
-          {["Arquivo dos Reinos", "Biblioteca", "Geradores", "Modelos", "Configuracoes"].map((item, index) => (
-            <span key={item} style={{ padding: "13px 14px", borderRadius: "16px", color: index === 0 ? "var(--forge-gold-light)" : "var(--forge-muted-strong)", background: index === 0 ? "rgba(245,158,11,0.14)" : "transparent", border: index === 0 ? "1px solid var(--forge-border-strong)" : "1px solid transparent" }}>{item}</span>
+          {["Arquivo dos Reinos", "Biblioteca", "Geradores", "Modelos", "Configurações"].map((item, index) => (
+            <span key={item} className={index === 0 ? "forge-nav-item-active" : "forge-nav-item"}>{item}</span>
           ))}
         </nav>
 
@@ -140,11 +140,11 @@ export function DashboardClient() {
       <section style={{ padding: "34px" }}>
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "24px", marginBottom: "28px" }}>
           <div>
-            <p className="forge-kicker">Painel de worldbuilding</p>
+            <p className="forge-kicker">Mesa do Mestre</p>
             <h1 style={{ fontSize: "54px", lineHeight: 0.96, margin: "10px 0 10px", letterSpacing: "-0.06em" }}>Arquivo dos Reinos</h1>
-            <p className="forge-muted" style={{ lineHeight: 1.65, maxWidth: "720px", margin: 0 }}>Aqui ficam os mundos que voce esta forjando. Cada cenario pertence somente a sua conta e pode evoluir para nacoes, locais, faccoes, personagens e segredos.</p>
+            <p className="forge-muted" style={{ lineHeight: 1.65, maxWidth: "720px", margin: 0 }}>Aqui ficam os mundos que você está forjando. Cada cenário pertence somente à sua conta e pode evoluir para nações, locais, facções, personagens e segredos.</p>
           </div>
-          <button className="forge-button-primary" onClick={() => setShowForm((current) => !current)} style={{ whiteSpace: "nowrap" }}>+ Novo cenario</button>
+          <button className="forge-button-primary" onClick={() => setShowForm((current) => !current)} style={{ whiteSpace: "nowrap" }}>+ Forjar Novo Mundo</button>
         </header>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "26px" }}>
@@ -159,32 +159,32 @@ export function DashboardClient() {
         {showForm ? (
           <section className="forge-panel" style={{ padding: "24px", marginBottom: "22px" }}>
             <p className="forge-kicker">Nova forja</p>
-            <h2 style={{ margin: "8px 0 16px" }}>Criar novo cenario</h2>
+            <h2 style={{ margin: "8px 0 16px" }}>Forjar novo mundo</h2>
             <div style={{ display: "grid", gap: "14px" }}>
               <label>
-                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Nome do cenario</span>
+                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Nome do cenário</span>
                 <input className="forge-input" value={newScenarioName} onChange={(event) => setNewScenarioName(event.target.value)} placeholder="Ex: Mares Insulares" />
               </label>
               <label>
-                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Premissa do mundo</span>
+                <span style={{ display: "block", color: "var(--forge-muted-strong)", marginBottom: "8px", fontSize: "14px" }}>Crônica inicial</span>
                 <textarea className="forge-textarea" value={newScenarioDescription} onChange={(event) => setNewScenarioDescription(event.target.value)} placeholder="Uma frase forte sobre o mundo, seus conflitos e sua atmosfera..." style={{ minHeight: "120px" }} />
               </label>
               <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                <button className="forge-button-primary" onClick={handleCreateScenario} disabled={creating} style={{ opacity: creating ? 0.7 : 1 }}>{creating ? "Criando..." : "Criar cenario"}</button>
+                <button className="forge-button-primary" onClick={handleCreateScenario} disabled={creating} style={{ opacity: creating ? 0.7 : 1 }}>{creating ? "Forjando..." : "Registrar na Forja"}</button>
                 <button className="forge-button-ghost" onClick={() => setShowForm(false)}>Cancelar</button>
               </div>
             </div>
           </section>
         ) : null}
 
-        {message ? <p style={{ color: message.includes("sucesso") ? "var(--forge-success)" : "var(--forge-danger)", marginTop: 0 }}>{message}</p> : null}
+        {message ? <p style={{ color: message.includes("Forja") ? "var(--forge-success)" : "var(--forge-danger)", marginTop: 0 }}>{message}</p> : null}
 
         {scenarios.length === 0 ? (
           <section className="forge-card-accent" style={{ borderStyle: "dashed", padding: "38px" }}>
             <p className="forge-kicker">Arquivo vazio</p>
-            <h2 style={{ marginTop: 0 }}>Sua primeira lenda ainda nao foi forjada.</h2>
-            <p className="forge-muted" style={{ lineHeight: 1.6, maxWidth: "620px" }}>Crie um cenario para comecar a organizar nacoes, cidades, faccoes e segredos de campanha.</p>
-            <button className="forge-button-primary" onClick={() => setShowForm(true)} style={{ marginTop: "10px" }}>Criar primeiro cenario</button>
+            <h2 style={{ marginTop: 0 }}>A forja ainda está fria.</h2>
+            <p className="forge-muted" style={{ lineHeight: 1.6, maxWidth: "620px" }}>Forje seu primeiro cenário para começar a organizar nações, cidades, facções e segredos de campanha.</p>
+            <button className="forge-button-primary" onClick={() => setShowForm(true)} style={{ marginTop: "10px" }}>Forjar primeiro mundo</button>
           </section>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "20px" }}>
@@ -192,16 +192,16 @@ export function DashboardClient() {
               <Link key={scenario.id} href={`/scenarios/${scenario.id}`} className="forge-panel" style={{ color: "inherit", textDecoration: "none", padding: "24px", minHeight: "210px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", alignItems: "flex-start" }}>
                   <div>
-                    <span style={{ color: "var(--forge-gold-light)", fontSize: "13px", fontWeight: 850, letterSpacing: "0.12em", textTransform: "uppercase" }}>Cenario pessoal</span>
+                    <span style={{ color: "var(--forge-gold-light)", fontSize: "13px", fontWeight: 850, letterSpacing: "0.12em", textTransform: "uppercase" }}>Mundo forjado</span>
                     <h2 style={{ margin: "9px 0 10px", fontSize: "30px", letterSpacing: "-0.03em" }}>{scenario.name}</h2>
                   </div>
                   <span style={{ width: "46px", height: "46px", borderRadius: "16px", display: "grid", placeItems: "center", background: "rgba(245,158,11,0.14)", color: "var(--forge-gold-light)" }}>✦</span>
                 </div>
-                <p style={{ color: "var(--forge-muted-strong)", lineHeight: 1.65 }}>{scenario.description || "Sem premissa ainda. Abra o cenario para definir o conceito central do mundo."}</p>
+                <p style={{ color: "var(--forge-muted-strong)", lineHeight: 1.65 }}>{scenario.description || "Sem crônica inicial ainda. Abra o cenário para definir o conceito central do mundo."}</p>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "20px" }}>
-                  <span style={{ color: "var(--forge-muted)", border: "1px solid var(--forge-border)", borderRadius: "999px", padding: "8px 11px" }}>0 nacoes</span>
-                  <span style={{ color: "var(--forge-muted)", border: "1px solid var(--forge-border)", borderRadius: "999px", padding: "8px 11px" }}>0 locais</span>
-                  <span style={{ color: "var(--forge-muted)", border: "1px solid var(--forge-border)", borderRadius: "999px", padding: "8px 11px" }}>0 faccoes</span>
+                  <span className="forge-chip">0 nações</span>
+                  <span className="forge-chip">0 locais</span>
+                  <span className="forge-chip">0 facções</span>
                 </div>
               </Link>
             ))}
