@@ -44,7 +44,7 @@ export function ScenarioSidebar({ scenario, rows, activeSection, onChangeSection
         })}
       </nav>
 
-      <Link href={`/scenarios/${scenario.id}/session`} className="forge-link-pill" style={{ marginTop: 22, textAlign: "center" }}>Abrir modo sessão</Link>
+      <Link href={`/scenarios/${scenario.id}/atlas`} className="forge-link-pill" style={{ marginTop: 22, textAlign: "center" }}>Abrir atlas</Link>
     </aside>
   );
 }
