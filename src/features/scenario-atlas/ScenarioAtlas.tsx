@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EntityDetailsModal } from "@/features/scenario-workspace/EntityDetailsModal";
-import { relationName, titleOf, valueText } from "@/features/scenario-workspace/entity-utils";
+import { relationName, singularLabelOf, titleOf, valueText } from "@/features/scenario-workspace/entity-utils";
 import { sectionConfigs, sections } from "@/features/scenario-workspace/section-config";
 import { emptyRows, getCurrentUser, getScenarioEntities, getScenarioForUser } from "@/features/scenario-workspace/scenario-service";
 import type { ActiveSection, EntityRecord, EntityRows, EntitySection, Scenario } from "@/features/scenario-workspace/types";
@@ -155,7 +155,7 @@ export function ScenarioAtlas({ scenarioId }: { scenarioId: string }) {
                           const config = sectionConfigs[section];
                           return (
                             <button key={`${section}-${item.id}`} className="forge-card" onClick={() => setSelectedEntity({ section, item })} style={{ padding: 18, color: "inherit", cursor: "pointer", textAlign: "left" }}>
-                              <p className="forge-kicker">{config.label}</p>
+                              <p className="forge-kicker">{singularLabelOf(section)}</p>
                               <h3 style={{ margin: "8px 0 0", fontSize: 24 }}>{String(titleOf(item, config))}</h3>
                             </button>
                           );
@@ -187,7 +187,7 @@ export function ScenarioAtlas({ scenarioId }: { scenarioId: string }) {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 }}>
                     {activeRows.map((item) => (
                       <button key={item.id} className="forge-card" onClick={() => setSelectedEntity({ section: activeSection, item })} style={{ padding: 18, color: "inherit", cursor: "pointer", textAlign: "left", minHeight: 128 }}>
-                        <p className="forge-kicker">{sectionConfigs[activeSection].label.slice(0, -1) || "Registro"}</p>
+                        <p className="forge-kicker">{singularLabelOf(activeSection)}</p>
                         <h3 style={{ margin: "8px 0 0", fontSize: 24, lineHeight: 1.08 }}>{String(titleOf(item, sectionConfigs[activeSection]))}</h3>
                         {(item.type || item.category || item.event_type) ? <span className="forge-status-pill" style={{ display: "inline-block", marginTop: 14 }}>{String(item.type || item.category || item.event_type)}</span> : null}
                         {(sectionConfigs[activeSection].relations ?? []).some((relation) => item[relation]) ? (
