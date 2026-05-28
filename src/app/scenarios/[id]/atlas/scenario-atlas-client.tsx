@@ -124,14 +124,23 @@ export function ScenarioAtlasClient({ scenarioId }: { scenarioId: string }) {
         return;
       }
 
-      const nextData = { ...data };
+      const nextData: Record<SectionKey, Item[]> = {
+        overview: [],
+        nations: [],
+        settlements: [],
+        locations: [],
+        factions: [],
+        characters: [],
+        timeline_events: [],
+        lore_entries: []
+      };
+
       for (const section of sections) {
         if (!section.table) continue;
         const { data: rows, error } = await supabase
           .from(section.table)
           .select("*")
           .eq("scenario_id", scenarioId)
-          .eq("user_id", userData.user.id)
           .order("created_at", { ascending: false });
 
         if (error) setMessage(error.message);
