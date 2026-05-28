@@ -246,7 +246,6 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
         .from("factions")
         .select(selectFields)
         .eq("scenario_id", data.id)
-        .eq("user_id", userData.user.id)
         .order("created_at", { ascending: false });
 
       setScenario(data);
