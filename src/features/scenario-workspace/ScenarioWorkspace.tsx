@@ -7,7 +7,7 @@ import { EntityEditorPanel } from "./EntityEditorPanel";
 import { EntityList } from "./EntityList";
 import { ScenarioOverview } from "./ScenarioOverview";
 import { ScenarioSidebar } from "./ScenarioSidebar";
-import { buildInitialData, buildPayloadFromForm, titleOf } from "./entity-utils";
+import { buildInitialData, buildPayloadFromForm, singularLabelOf, titleOf } from "./entity-utils";
 import { fieldLabels, sectionConfigs } from "./section-config";
 import {
   createEntity,
@@ -162,7 +162,7 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
     }));
 
     closeEditor();
-    setMessage(`${config.label.slice(0, -1) || config.label} gravado na Forja.`);
+    setMessage(`${singularLabelOf(editingSection)} gravado na Forja.`);
   }
 
   async function deleteEntity(section: EntitySection, item: EntityRecord) {
@@ -190,7 +190,7 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
     }));
 
     if (editingId === item.id) closeEditor();
-    setMessage(`${config.label.slice(0, -1) || config.label} apagado da Forja.`);
+    setMessage(`${singularLabelOf(section)} apagado da Forja.`);
   }
 
   if (loading) {
