@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EntityEditorPanel } from "./EntityEditorPanel";
-import { EntityList, titleOf, valueText } from "./EntityList";
+import { EntityList } from "./EntityList";
 import { ScenarioOverview } from "./ScenarioOverview";
 import { ScenarioSidebar } from "./ScenarioSidebar";
+import { buildInitialData, buildPayloadFromForm, titleOf } from "./entity-utils";
 import { fieldLabels, sectionConfigs } from "./section-config";
 import {
   createEntity,
@@ -81,34 +82,21 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
     setFormData((current) => ({ ...current, [field]: value }));
   }
 
-  function buildInitialData(section: EntitySection, item?: EntityRecord, extra?: Record<string, string>) {
-    const config = sectionConfigs[section];
-    const data: Record<string, string> = {};
-
-    for (const field of config.fields) {
-      data[field.key] = item ? valueText(item[field.key]) === "Não definido" ? "" : valueText(item[field.key]) : "";
-    }
-
-    for (const relation of config.relations ?? []) {
-      data[relation] = item ? String(item[relation] ?? "") : "";
-    }
-
-    return { ...data, ...(extra ?? {}) };
-  }
-
   function openCreate(section: EntitySection, extra?: Record<string, string>) {
+    const config = sectionConfigs[section];
     setActiveSection(section);
     setEditingSection(section);
     setEditingId(null);
-    setFormData(buildInitialData(section, undefined, extra));
+    setFormData(buildInitialData(config, undefined, extra));
     setEditorMode("entity-create");
   }
 
   function openEdit(section: EntitySection, item: EntityRecord) {
+    const config = sectionConfigs[section];
     setActiveSection(section);
     setEditingSection(section);
     setEditingId(item.id);
-    setFormData(buildInitialData(section, item));
+    setFormData(buildInitialData(config, item));
     setEditorMode("entity-edit");
   }
 
@@ -150,10 +138,7 @@ export function ScenarioWorkspace({ scenarioId }: { scenarioId: string }) {
       return;
     }
 
-    const payload: Record<string, string | null> = {};
-
-    for (const field of config.fields) payload[field.key] = formData[field.key]?.trim() ?? "";
-    for (const relation of config.relations ?? []) payload[relation] = formData[relation] || null;
+    const payload = buildPayloadFromForm(config, formData);
 
     setSaving(true);
     setMessage("");
