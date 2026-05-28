@@ -674,7 +674,6 @@ export function ScenarioClient({ scenarioId }: { scenarioId: string }) {
       .from("factions")
       .insert({
         scenario_id: scenario.id,
-        user_id: scenario.user_id,
         nation_id: factionNationId || null,
         location_id: factionLocationId || null,
         name: factionName.trim(),
