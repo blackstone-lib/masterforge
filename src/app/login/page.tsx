@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LoginForm } from "./login-form";
 
 export default function LoginPage() {
   return (
@@ -22,23 +23,13 @@ export default function LoginPage() {
         <div>
           <p style={{ color: "#f59e0b", fontWeight: 800, marginTop: 0 }}>Acesso</p>
           <h2 style={{ fontSize: "34px", margin: "0 0 10px" }}>Entrar na conta</h2>
-          <p style={{ color: "#94a3b8", lineHeight: 1.6, marginBottom: "28px" }}>Login visual preparado para receber Supabase Auth.</p>
+          <p style={{ color: "#94a3b8", lineHeight: 1.6, marginBottom: "28px" }}>Entre ou crie sua conta usando Supabase Auth.</p>
         </div>
 
-        <form style={{ display: "grid", gap: "18px" }}>
-          <label>
-            <span style={{ display: "block", color: "#cbd5e1", marginBottom: "9px", fontSize: "14px" }}>E-mail</span>
-            <input type="email" placeholder="voce@email.com" style={{ width: "100%", boxSizing: "border-box", padding: "14px 15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none" }} />
-          </label>
-          <label>
-            <span style={{ display: "block", color: "#cbd5e1", marginBottom: "9px", fontSize: "14px" }}>Senha</span>
-            <input type="password" placeholder="********" style={{ width: "100%", boxSizing: "border-box", padding: "14px 15px", borderRadius: "16px", border: "1px solid rgba(148,163,184,0.24)", background: "rgba(2,6,23,0.68)", color: "#f8fafc", outline: "none" }} />
-          </label>
-          <button type="button" style={{ marginTop: "8px", background: "linear-gradient(135deg, #f59e0b, #fbbf24)", color: "#111827", border: 0, padding: "15px", borderRadius: "999px", fontWeight: 900, cursor: "pointer" }}>Entrar na forja</button>
-        </form>
+        <LoginForm />
 
         <div style={{ marginTop: "22px", padding: "16px", borderRadius: "18px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.16)" }}>
-          <p style={{ color: "#cbd5e1", margin: 0 }}>Ainda sem login real?</p>
+          <p style={{ color: "#cbd5e1", margin: 0 }}>Quer apenas visualizar?</p>
           <Link href="/dashboard" style={{ color: "#fbbf24", fontWeight: 800, textDecoration: "none" }}>Entrar no modo demo</Link>
         </div>
       </aside>
