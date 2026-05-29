@@ -39,7 +39,8 @@ export const sectionConfigs: Record<EntitySection, SectionConfig> = {
     createLabel: "Criar assentamento",
     emptyTitle: "Nenhum assentamento registrado.",
     emptyText: "Cidades, vilas, capitais e povoados aparecerão aqui.",
-    selectFields: "id, scenario_id, name, type, description, population, government, economy, notable_places, created_at, updated_at",
+    selectFields: "id, scenario_id, nation_id, name, type, description, population, government, economy, notable_places, created_at, updated_at",
+    relations: ["nation_id"],
     fields: [
       field({ key: "name", label: "Nome", required: true, priority: 1 }),
       field({ key: "type", label: "Tipo", type: "select", options: ["Vila", "Cidade", "Capital", "Fortaleza", "Porto", "Ruína habitada"], priority: 2 }),
